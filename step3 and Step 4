@@ -1,0 +1,111 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+
+// 1. Posting Node (Linked List for Doc IDs)
+struct PostingNode {
+    int doc_id;
+    int term_frequency;
+    PostingNode* next;
+};
+
+// 2. Word Node (Linked List for Vocabulary)
+struct WordNode {
+    char word[64];
+    PostingNode* head_posting;
+    WordNode* next;
+};
+
+// Allocate and initialize a posting node using malloc
+PostingNode* create_posting_node(int doc_id) {
+    PostingNode* node = (PostingNode*)malloc(sizeof(PostingNode));
+    if (!node) exit(EXIT_FAILURE);
+    node->doc_id = doc_id;
+    node->term_frequency = 1;
+    node->next = NULL;
+    return node;
+}
+
+// Append or update posting list
+void append_posting(PostingNode** head_ref, int doc_id) {
+    if (*head_ref == NULL) {
+        *head_ref = create_posting_node(doc_id);
+        return;
+    }
+    PostingNode* curr = *head_ref;
+    PostingNode* prev = NULL;
+    while (curr != NULL) {
+        if (curr->doc_id == doc_id) {
+            curr->term_frequency++;
+            return;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+    prev->next = create_posting_node(doc_id);
+}
+
+// Recursive word insertion into Linked List
+void insert_word_recursive(WordNode** head_ref, const char* word, int doc_id) {
+    if (*head_ref == NULL) {
+        WordNode* new_word = (WordNode*)malloc(sizeof(WordNode));
+        if (!new_word) exit(EXIT_FAILURE);
+        std::strncpy(new_word->word, word, sizeof(new_word->word) - 1);
+        new_word->word[sizeof(new_word->word) - 1] = '\0';
+        new_word->head_posting = create_posting_node(doc_id);
+        new_word->next = NULL;
+        *head_ref = new_word;
+        return;
+    }
+
+    if (std::strcmp((*head_ref)->word, word) == 0) {
+        append_posting(&((*head_ref)->head_posting), doc_id);
+        return;
+    }
+
+    insert_word_recursive(&((*head_ref)->next), word, doc_id);
+}
+
+// Recursive search
+PostingNode* search_recursive(WordNode* head, const char* word) {
+    if (head == NULL) return NULL;
+    if (std::strcmp(head->word, word) == 0) {
+        return head->head_posting;
+    }
+    return search_recursive(head->next, word);
+}
+
+// Recursive memory cleanup
+void free_index(WordNode* head) {
+    if (head == NULL) return;
+    free_index(head->next);
+    
+    PostingNode* curr = head->head_posting;
+    while (curr != NULL) {
+        PostingNode* temp = curr;
+        curr = curr->next;
+        free(temp);
+    }
+    free(head);
+}
+
+int main() {
+    WordNode* indexHead = NULL;
+
+    // Indexing sample words directly using pointers and linked lists
+    insert_word_recursive(&indexHead, "count", 1);
+    insert_word_recursive(&indexHead, "stack", 1);
+    insert_word_recursive(&indexHead, "count", 2);
+
+    // Searching
+    PostingNode* res = search_recursive(indexHead, "count");
+    if (res != NULL) {
+        std::cout << "Found token 'count' in Doc ID: " << res->doc_id 
+                  << " with frequency: " << res->term_frequency << "\n";
+    }
+
+    free_index(indexHead);
+    return 0;
+}
