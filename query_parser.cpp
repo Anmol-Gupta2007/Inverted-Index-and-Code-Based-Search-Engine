@@ -24,3 +24,24 @@ vector<string> tokenize_query(const string &raw_query) {
     }
     return tokens;
 }
+extern "C" {
+PostingNode* intersect_and(const PostingNode *p1, const PostingNode *p2) {
+    PostingNode *head = nullptr;
+    PostingNode *tail = nullptr;
+    while (p1 != nullptr && p2 != nullptr) {
+        if (p1->doc_id == p2->doc_id) {
+            PostingNode *new_node = create_node(p1->doc_id, p1->term_frequency + p2->term_frequency);
+            if (!head) head = new_node;
+            else tail->next = new_node;
+            tail = new_node;
+            p1 = p1->next;
+            p2 = p2->next;
+        } else if (p1->doc_id < p2->doc_id) {
+            p1 = p1->next;
+        } else {
+            p2 = p2->next;
+        }
+    }
+    return head;
+}
+}
