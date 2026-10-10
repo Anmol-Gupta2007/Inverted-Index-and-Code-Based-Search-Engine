@@ -3,6 +3,7 @@
 **Title:** Inverted Index and Code-Based Search Engine.  
 
 <div style="text-align: justify;">
+  
 **Description:** The project is a standalone, high-performance search engine designed to quickly find keywords, functions, variables, and classes across numerous source-code files and text documents. It functions by creating an inverted index that maps words to their file paths and exact locations, enabling instant lookups instead of scanning documents sequentially.
 <div>
 
