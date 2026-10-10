@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Acer | Next-Gen Code Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Poppins (Headings), Inter (Body), Fira Code (Code Accents) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.260.0/lucide.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                        fira: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#020617', // slate-950
+                            panel: 'rgba(30, 41, 59, 0.4)', // slate-800 translucent
+                            border: 'rgba(255, 255, 255, 0.08)'
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .glass-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Upload Zone Hover Effects */
+        .upload-zone {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .upload-zone:hover {
+            border-color: #06b6d4; /* cyan-500 */
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.15) inset, 0 0 20px rgba(6, 182, 212, 0.2);
+            background: rgba(6, 182, 212, 0.03);
+        }
+
+        /* Custom Scrollbar for Inputs */
+        input:focus {
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5); /* indigo focus */
+        }
+    </style>
+</head>
+<body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
+
+    <!-- Ambient Background Blobs -->
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
+        <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-cyan-900/20 mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-blue-900/20 mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000"></div>
+    </div>
+
+    <nav class="glass sticky top-0 z-40 w-full border-b border-white/5 shadow-lg">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer group">
+                <div class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow">
+                    <i data-lucide="terminal-square" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="text-2xl font-poppins font-bold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-blue-500 transition-all">Code Acer</span>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <button onclick="openModal('loginModal')" class="font-poppins font-medium text-slate-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-cyan-400 after:transition-all after:duration-300 hover:after:w-full">
+                    Log in
+                </button>
+                <button onclick="openModal('signupModal')" class="font-poppins font-medium px-6 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-400/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all duration-300 text-white">
+                    Sign up
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center px-4 z-10 relative mt-16 mb-20">
+        <div class="text-center max-w-4xl mx-auto mb-16">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 text-sm font-fira text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                </span>
+                v2.0 Architecture Deployed
+            </div>
+            
+            <h1 class="text-6xl md:text-8xl font-poppins font-extrabold tracking-tighter mb-6">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-sm">
+                    Code Acer
+                </span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-400 font-light max-w-2xl mx-auto leading-relaxed">
+                The blazingly fast inverted index search engine. Find keywords, functions, and classes across your repositories in milliseconds.
+            </p>
+        </div>
+
+        <!-- Upload Zone -->
+        <div class="w-full max-w-3xl mx-auto">
+            <label for="file-upload" class="upload-zone relative flex flex-col items-center justify-center w-full h-72 rounded-3xl cursor-pointer overflow-hidden border-2 border-slate-700/50 border-dashed bg-slate-900/50 backdrop-blur-sm group">
+                
+                <!-- Glowing corner accents for premium feel -->
+                <div class="absolute top-0 left-0 w-16 h-16 bg-cyan-500/10 blur-2xl rounded-full"></div>
+                <div class="absolute bottom-0 right-0 w-16 h-16 bg-purple-500/10 blur-2xl rounded-full"></div>
+
+                <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-6 z-10">
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:scale-110 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-all duration-300 mb-6">
+                        <i data-lucide="cloud-upload" class="w-10 h-10 text-slate-400 group-hover:text-cyan-400 transition-colors"></i>
+                    </div>
+                    <p class="mb-3 text-2xl font-poppins font-semibold text-slate-100">
+                        Upload .c file, .cpp file, .py file, .java, pdf or word
+                    </p>
+                    <p class="text-md text-slate-500 font-inter">
+                        Drag and drop your project files here, or <span class="text-cyan-400 underline decoration-cyan-400/30 underline-offset-4 group-hover:decoration-cyan-400 transition-all">browse files</span>
+                    </p>
+                </div>
+                <input id="file-upload" type="file" class="hidden" multiple accept=".c,.cpp,.py,.java,.pdf,.doc,.docx" />
+            </label>
+        </div>
+    </main>
+
+    <footer class="mt-auto border-t border-white/5 bg-slate-950/50 backdrop-blur-lg z-10 py-8 relative">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-slate-500 font-fira text-sm flex items-center justify-center gap-2">
+                <i data-lucide="code" class="w-4 h-4"></i>
+                Created by Anmol Gupta, Harshit Kumar, Atharav Goyal, Navneet Nainwal
+            </p>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
+        
+        <!-- Modal Content -->
+        <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="loginCard">
+            <button onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-poppins font-bold text-white mb-2">Welcome back</h2>
+                <p class="text-slate-400">Sign in to access your dashboard</p>
+            </div>
+
+            <form onsubmit="event.preventDefault();" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
+                    <input type="email" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="name@company.com" required>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-medium text-slate-300 font-inter">Password</label>
+                        <a href="#" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">Forgot password?</a>
+                    </div>
+                    <input type="password" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
+                    Sign in
+                </button>
+            </form>
+            <p class="mt-8 text-center text-sm text-slate-400">
+                New to Code Acer? <button onclick="switchModal('loginModal', 'signupModal')" class="text-white font-medium hover:text-cyan-400 transition-colors ml-1">Create an account</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="signupBackdrop" onclick="closeModal('signupModal')"></div>
+        
+        <!-- Modal Content -->
+        <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="signupCard">
+            <button onclick="closeModal('signupModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-poppins font-bold text-white mb-2">Join Code Acer</h2>
+                <p class="text-slate-400">Start searching your codebase instantly</p>
+            </div>
+
+            <form onsubmit="event.preventDefault();" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
+                    <input type="text" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="John Doe" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
+                    <input type="email" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="name@company.com" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Password</label>
+                    <input type="password" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="Create a strong password" required>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
+                    Create Account
+                </button>
+            </form>
+            <p class="mt-8 text-center text-sm text-slate-400">
+                Already have an account? <button onclick="switchModal('signupModal', 'loginModal')" class="text-white font-medium hover:text-purple-400 transition-colors ml-1">Log in</button>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Modal Logic with elegant transitions
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
+            const card = document.getElementById(modalId.replace('Modal', 'Card'));
+            
+            // Remove hidden class first to display block
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Force a reflow so the transition applies
+            void modal.offsetWidth;
+            
+            // Apply transition classes
+            backdrop.classList.remove('opacity-0');
+            backdrop.classList.add('opacity-100');
+            
+            card.classList.remove('opacity-0', 'scale-95');
+            card.classList.add('opacity-100', 'scale-100');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
+            const card = document.getElementById(modalId.replace('Modal', 'Card'));
+            
+            // Remove transition classes
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            
+            card.classList.remove('opacity-100', 'scale-100');
+            card.classList.add('opacity-0', 'scale-95');
+            
+            // Wait for transition to finish before hiding
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function switchModal(closeId, openId) {
+            closeModal(closeId);
+            setTimeout(() => {
+                openModal(openId);
+            }, 200); // Slight overlap for smoother feel
+        }
+    </script>
+</body>
+</html>
