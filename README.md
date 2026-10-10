@@ -76,4 +76,4 @@ The Inverted Index and Code-Based Search Engine aims to develop a fast and effic
 The project focuses on applying Data Structures and Algorithms concepts to build a practical search engine. It can use structures such as hash tables for indexing and fast keyword lookup, linked lists for maintaining document references, trees for organized searching, and sorting and searching algorithms for ranking and retrieving results. For source-code files, the system can additionally identify programming-specific elements such as functions, variables, classes, and keywords.
 
 The main problem addressed by this project is therefore how to efficiently search and retrieve relevant information from a large collection of text and code files while minimizing search time and unnecessary file scanning. The proposed system aims to provide faster keyword-based searching, organized results, and a foundation for scalable code-search applications. It also demonstrates how fundamental DSA concepts can be combined to solve a real-world information retrieval problem.
-<div>
+</div>
