@@ -4,16 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Acer | Next-Gen Code Search</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Poppins (Headings), Inter (Body), Fira Code (Code Accents) -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Lucide Icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.260.0/lucide.min.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -22,13 +19,6 @@
                         poppins: ['Poppins', 'sans-serif'],
                         inter: ['Inter', 'sans-serif'],
                         fira: ['Fira Code', 'monospace'],
-                    },
-                    colors: {
-                        brand: {
-                            dark: '#020617', // slate-950
-                            panel: 'rgba(30, 41, 59, 0.4)', // slate-800 translucent
-                            border: 'rgba(255, 255, 255, 0.08)'
-                        }
                     },
                     animation: {
                         'blob': 'blob 7s infinite',
@@ -45,9 +35,10 @@
             }
         }
     </script>
+
     <style>
         body {
-            background-color: #020617;
+            background-color: #020617; /* slate-950 */
             color: #f8fafc;
             overflow-x: hidden;
         }
@@ -79,21 +70,23 @@
 
         /* Custom Scrollbar for Inputs */
         input:focus {
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5); /* indigo focus */
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
         }
     </style>
 </head>
+
 <body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
 
     <!-- Ambient Background Blobs -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
         <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-cyan-900/20 mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[-20%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-blue-900/20 mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-cyan-900/20 mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-blue-900/20 mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000" style="animation-delay: 4s;"></div>
     </div>
 
     <nav class="glass sticky top-0 z-40 w-full border-b border-white/5 shadow-lg">
         <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <!-- Logo -->
             <div class="flex items-center gap-3 cursor-pointer group">
                 <div class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow">
                     <i data-lucide="terminal-square" class="w-6 h-6 text-white"></i>
@@ -101,6 +94,7 @@
                 <span class="text-2xl font-poppins font-bold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-blue-500 transition-all">Code Acer</span>
             </div>
             
+            <!-- Auth Buttons -->
             <div class="flex items-center gap-6">
                 <button onclick="openModal('loginModal')" class="font-poppins font-medium text-slate-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-cyan-400 after:transition-all after:duration-300 hover:after:w-full">
                     Log in
@@ -119,7 +113,7 @@
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
                 </span>
-                v2.0 Architecture Deployed
+                Secure Cloud Indexing
             </div>
             
             <h1 class="text-6xl md:text-8xl font-poppins font-extrabold tracking-tighter mb-6">
@@ -132,34 +126,39 @@
             </p>
         </div>
 
-        <!-- Upload Zone -->
+        <!-- Upload Zone (Locked) -->
         <div class="w-full max-w-3xl mx-auto">
-            <label for="file-upload" class="upload-zone relative flex flex-col items-center justify-center w-full h-72 rounded-3xl cursor-pointer overflow-hidden border-2 border-slate-700/50 border-dashed bg-slate-900/50 backdrop-blur-sm group">
+            <div onclick="openModal('loginModal')" class="upload-zone relative flex flex-col items-center justify-center w-full h-72 rounded-3xl cursor-pointer overflow-hidden border-2 border-slate-700/50 border-dashed bg-slate-900/50 backdrop-blur-sm group">
                 
-                <!-- Glowing corner accents for premium feel -->
+                <!-- Glowing corner accents -->
                 <div class="absolute top-0 left-0 w-16 h-16 bg-cyan-500/10 blur-2xl rounded-full"></div>
                 <div class="absolute bottom-0 right-0 w-16 h-16 bg-purple-500/10 blur-2xl rounded-full"></div>
+
+                <!-- Lock Badge -->
+                <div class="absolute top-5 right-5 bg-slate-900/80 backdrop-blur-md border border-slate-700/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg z-20 group-hover:border-cyan-500/50 transition-colors">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    <span class="text-xs font-poppins font-medium text-slate-300 group-hover:text-cyan-100 transition-colors">Login Required</span>
+                </div>
 
                 <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-6 z-10">
                     <div class="p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:scale-110 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-all duration-300 mb-6">
                         <i data-lucide="cloud-upload" class="w-10 h-10 text-slate-400 group-hover:text-cyan-400 transition-colors"></i>
                     </div>
-                    <p class="mb-3 text-2xl font-poppins font-semibold text-slate-100">
+                    <!-- EXACT TEXT REQUESTED -->
+                    <p class="mb-3 text-2xl md:text-3xl font-poppins font-semibold text-slate-100">
                         Upload .c file, .cpp file, .py file, .java, pdf or word
                     </p>
                     <p class="text-md text-slate-500 font-inter">
-                        Drag and drop your project files here, or <span class="text-cyan-400 underline decoration-cyan-400/30 underline-offset-4 group-hover:decoration-cyan-400 transition-all">browse files</span>
+                        Click anywhere in this zone to <span class="text-cyan-400 underline decoration-cyan-400/30 underline-offset-4 group-hover:decoration-cyan-400 transition-all">sign in and continue</span>
                     </p>
                 </div>
-                <input id="file-upload" type="file" class="hidden" multiple accept=".c,.cpp,.py,.java,.pdf,.doc,.docx" />
-            </label>
+            </div>
         </div>
     </main>
 
     <footer class="mt-auto border-t border-white/5 bg-slate-950/50 backdrop-blur-lg z-10 py-8 relative">
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-slate-500 font-fira text-sm flex items-center justify-center gap-2">
-                <i data-lucide="code" class="w-4 h-4"></i>
+            <p class="text-slate-500 font-inter text-sm flex items-center justify-center gap-2">
                 Created by Anmol Gupta, Harshit Kumar, Atharav Goyal, Navneet Nainwal
             </p>
         </div>
@@ -177,24 +176,27 @@
             </button>
             
             <div class="text-center mb-8">
+                <div class="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
+                    <i data-lucide="lock" class="w-6 h-6 text-cyan-400"></i>
+                </div>
                 <h2 class="text-3xl font-poppins font-bold text-white mb-2">Welcome back</h2>
-                <p class="text-slate-400">Sign in to access your dashboard</p>
+                <p class="text-slate-400">Sign in to unlock file uploads</p>
             </div>
 
             <form onsubmit="event.preventDefault();" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
-                    <input type="email" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="name@company.com" required>
+                    <input type="email" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <label class="block text-sm font-medium text-slate-300 font-inter">Password</label>
                         <a href="#" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">Forgot password?</a>
                     </div>
-                    <input type="password" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="••••••••" required>
+                    <input type="password" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
-                    Sign in
+                    Sign in to Continue
                 </button>
             </form>
             <p class="mt-8 text-center text-sm text-slate-400">
@@ -222,15 +224,15 @@
             <form onsubmit="event.preventDefault();" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
-                    <input type="text" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="John Doe" required>
+                    <input type="text" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="John Doe" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
-                    <input type="email" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="name@company.com" required>
+                    <input type="email" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Password</label>
-                    <input type="password" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none transition-all font-inter" placeholder="Create a strong password" required>
+                    <input type="password" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="Create a strong password" required>
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
                     Create Account
