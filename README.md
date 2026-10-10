@@ -4,11 +4,13 @@
 
 **Description:** The project is a standalone, high-performance search engine designed to quickly find keywords, functions, variables, and classes across numerous source-code files and text documents. It functions by creating an inverted index that maps words to their file paths and exact locations, enabling instant lookups instead of scanning documents sequentially.
 
+
 ***Problem Statement/Objective*** 
 
 **Problem Statement:** Traditional search techniques read documents step-by-step, which is highly time-consuming for developers searching through huge code repositories or databases.
 
 **Objective:** To develop a fast, organized search system using inverted indexing, hashing, and data structures to retrieve relevant files instantly without scanning the entire dataset.   
+
 
 ***Team Members*** **(Name: Code Acer (ID: DSCPP-III-2026-T112))** 
 
@@ -16,6 +18,7 @@
 2. Harshit kumar: Developer (Student ID: 2510012451).
 3. Atharva Goyal: Developer/Docs (Student ID: 2510360047).
 4. Navneet Nainwal: DB/Testing (Student ID: 2510010627).
+
   
 ***Technologies/Tools Used***
 
@@ -29,9 +32,11 @@
 
 **Platforms:** Windows/Linux.   
 
+
 ***Project Setup/Installation Instructions***
 
 The provided documents do not contain instructions for setting up or installing the project.
+
 
 ***Major Features/Modules***
 
@@ -46,6 +51,7 @@ The provided documents do not contain instructions for setting up or installing 
 **Min-Heap Ranker:** Uses TF-IDF scoring to evaluate document relevance and outputs ranked search results.
 
 **Binary Index Persistence:** Saves indexed data to avoid having to rebuild the index for subsequent searches.
+
 
 ***Current Project Status/Progress***
 
