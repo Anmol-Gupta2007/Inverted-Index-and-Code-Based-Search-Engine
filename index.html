@@ -38,12 +38,11 @@
 
     <style>
         body {
-            background-color: #020617; /* slate-950 */
+            background-color: #020617;
             color: #f8fafc;
             overflow-x: hidden;
         }
         
-        /* Glassmorphism Utilities */
         .glass {
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(16px);
@@ -58,17 +57,15 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
-        /* Upload Zone Hover Effects */
         .upload-zone {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .upload-zone:hover {
-            border-color: #06b6d4; /* cyan-500 */
+            border-color: #06b6d4;
             box-shadow: 0 0 30px rgba(6, 182, 212, 0.15) inset, 0 0 20px rgba(6, 182, 212, 0.2);
             background: rgba(6, 182, 212, 0.03);
         }
 
-        /* Custom Scrollbar for Inputs */
         input:focus {
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
         }
@@ -86,7 +83,6 @@
 
     <nav class="glass sticky top-0 z-40 w-full border-b border-white/5 shadow-lg">
         <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <!-- Logo -->
             <div class="flex items-center gap-3 cursor-pointer group">
                 <div class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow">
                     <i data-lucide="terminal-square" class="w-6 h-6 text-white"></i>
@@ -94,7 +90,6 @@
                 <span class="text-2xl font-poppins font-bold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-blue-500 transition-all">Code Acer</span>
             </div>
             
-            <!-- Auth Buttons -->
             <div class="flex items-center gap-6">
                 <button onclick="openModal('loginModal')" class="font-poppins font-medium text-slate-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-cyan-400 after:transition-all after:duration-300 hover:after:w-full">
                     Log in
@@ -126,15 +121,12 @@
             </p>
         </div>
 
-        <!-- Upload Zone (Locked) -->
         <div class="w-full max-w-3xl mx-auto">
             <div onclick="openModal('loginModal')" class="upload-zone relative flex flex-col items-center justify-center w-full h-72 rounded-3xl cursor-pointer overflow-hidden border-2 border-slate-700/50 border-dashed bg-slate-900/50 backdrop-blur-sm group">
                 
-                <!-- Glowing corner accents -->
                 <div class="absolute top-0 left-0 w-16 h-16 bg-cyan-500/10 blur-2xl rounded-full"></div>
                 <div class="absolute bottom-0 right-0 w-16 h-16 bg-purple-500/10 blur-2xl rounded-full"></div>
 
-                <!-- Lock Badge -->
                 <div class="absolute top-5 right-5 bg-slate-900/80 backdrop-blur-md border border-slate-700/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg z-20 group-hover:border-cyan-500/50 transition-colors">
                     <i data-lucide="lock" class="w-3.5 h-3.5 text-cyan-400"></i>
                     <span class="text-xs font-poppins font-medium text-slate-300 group-hover:text-cyan-100 transition-colors">Login Required</span>
@@ -144,7 +136,6 @@
                     <div class="p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:scale-110 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-all duration-300 mb-6">
                         <i data-lucide="cloud-upload" class="w-10 h-10 text-slate-400 group-hover:text-cyan-400 transition-colors"></i>
                     </div>
-                    <!-- EXACT TEXT REQUESTED -->
                     <p class="mb-3 text-2xl md:text-3xl font-poppins font-semibold text-slate-100">
                         Upload .c file, .cpp file, .py file, .java, pdf or word
                     </p>
@@ -166,10 +157,8 @@
 
     <!-- Login Modal -->
     <div id="loginModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
-        <!-- Backdrop -->
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
         
-        <!-- Modal Content -->
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="loginCard">
             <button onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
@@ -183,7 +172,6 @@
                 <p class="text-slate-400">Sign in to unlock file uploads</p>
             </div>
 
-            <!-- UPDATED FORM FOR GOOGLE SHEETS -->
             <form id="loginForm" onsubmit="submitLogin(event)" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
@@ -200,8 +188,8 @@
                     </div>
                     <input type="password" id="loginPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="••••••••" required>
                 </div>
-                <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4 flex justify-center items-center gap-2">
-                    <span>Sign in to Continue</span>
+                <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
+                    Sign in to Continue
                 </button>
             </form>
             <p class="mt-8 text-center text-sm text-slate-400">
@@ -212,10 +200,8 @@
 
     <!-- Signup Modal -->
     <div id="signupModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
-        <!-- Backdrop -->
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="signupBackdrop" onclick="closeModal('signupModal')"></div>
         
-        <!-- Modal Content -->
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="signupCard">
             <button onclick="closeModal('signupModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
@@ -226,20 +212,21 @@
                 <p class="text-slate-400">Start searching your codebase instantly</p>
             </div>
 
-            <form onsubmit="event.preventDefault();" class="space-y-5">
+            <!-- UPDATED SIGNUP FORM -->
+            <form id="signupForm" onsubmit="submitSignup(event)" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
-                    <input type="text" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="John Doe" required>
+                    <input type="text" id="signupName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="John Doe" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
-                    <input type="email" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="name@company.com" required>
+                    <input type="email" id="signupEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Password</label>
-                    <input type="password" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="Create a strong password" required>
+                    <input type="password" id="signupPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="Create a strong password" required>
                 </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
+                <button type="submit" id="signupSubmitBtn" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
                     Create Account
                 </button>
             </form>
@@ -250,23 +237,18 @@
     </div>
 
     <script>
-        // Initialize Lucide icons
         lucide.createIcons();
 
-        // Modal Logic with elegant transitions
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
             const card = document.getElementById(modalId.replace('Modal', 'Card'));
             
-            // Remove hidden class first to display block
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
-            // Force a reflow so the transition applies
             void modal.offsetWidth;
             
-            // Apply transition classes
             backdrop.classList.remove('opacity-0');
             backdrop.classList.add('opacity-100');
             
@@ -279,14 +261,12 @@
             const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
             const card = document.getElementById(modalId.replace('Modal', 'Card'));
             
-            // Remove transition classes
             backdrop.classList.remove('opacity-100');
             backdrop.classList.add('opacity-0');
             
             card.classList.remove('opacity-100', 'scale-100');
             card.classList.add('opacity-0', 'scale-95');
             
-            // Wait for transition to finish before hiding
             setTimeout(() => {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
@@ -297,46 +277,64 @@
             closeModal(closeId);
             setTimeout(() => {
                 openModal(openId);
-            }, 200); // Slight overlap for smoother feel
+            }, 200); 
         }
 
         // ==========================================
-        // GOOGLE SHEETS SUBMISSION LOGIC
+        // GOOGLE SHEETS SUBMISSION & REDIRECT LOGIC
         // ==========================================
         
-        // WITH QUOTES AROUND THE URL
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzf0LHtqFtwy2-vYK-BrpsMrd7pzWrrFykAhsbmE1AMPCtZXLSlKA88PG99avAiOJSKZQ/exec'; 
 
+        // LOGIN FUNCTION
         function submitLogin(event) {
-            event.preventDefault(); // Prevent page reload
+            event.preventDefault(); 
             
             const submitBtn = document.getElementById('loginSubmitBtn');
             const originalBtnText = submitBtn.innerHTML;
             
-            // Show a loading state
             submitBtn.innerHTML = "Saving...";
             submitBtn.disabled = true;
 
-            // Gather the data
             const formData = new FormData();
             formData.append('name', document.getElementById('loginName').value);
             formData.append('email', document.getElementById('loginEmail').value);
             formData.append('password', document.getElementById('loginPassword').value);
 
-            // Send data to Google Sheets
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-            })
+            fetch(SCRIPT_URL, { method: 'POST', body: formData })
             .then(response => response.text())
             .then(data => {
-                // Reset form and UI on success
+                // Redirect to a new page! Make sure you create 'dashboard.html'
+                window.location.href = "dashboard.html";
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
                 submitBtn.innerHTML = originalBtnText;
                 submitBtn.disabled = false;
-                document.getElementById('loginForm').reset();
-                
-                alert("Success! Data saved to Google Sheets.");
-                closeModal('loginModal');
+                alert("There was an error saving your data.");
+            });
+        }
+
+        // NEW: SIGNUP FUNCTION
+        function submitSignup(event) {
+            event.preventDefault(); 
+            
+            const submitBtn = document.getElementById('signupSubmitBtn');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = "Creating Account...";
+            submitBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('signupName').value);
+            formData.append('email', document.getElementById('signupEmail').value);
+            formData.append('password', document.getElementById('signupPassword').value);
+
+            fetch(SCRIPT_URL, { method: 'POST', body: formData })
+            .then(response => response.text())
+            .then(data => {
+                // Redirect to a new page! Make sure you create 'dashboard.html'
+                window.location.href = "dashboard.html";
             })
             .catch(error => {
                 console.error('Error!', error.message);
