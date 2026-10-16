@@ -172,6 +172,7 @@
                 <p class="text-slate-400">Sign in to unlock file uploads</p>
             </div>
 
+            <!-- LOGIN FORM -->
             <form id="loginForm" onsubmit="submitLogin(event)" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
@@ -212,7 +213,7 @@
                 <p class="text-slate-400">Start searching your codebase instantly</p>
             </div>
 
-            <!-- UPDATED SIGNUP FORM -->
+            <!-- SIGNUP FORM -->
             <form id="signupForm" onsubmit="submitSignup(event)" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
@@ -281,68 +282,33 @@
         }
 
         // ==========================================
-        // GOOGLE SHEETS SUBMISSION & REDIRECT LOGIC
+        // REDIRECT LOGIC
         // ==========================================
-        
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyh2a3ICAZR_de3ewxVcF8jwdt7OsFbQqS2g5E3x-HIP4UdEZP_Vjn-tYmX2QOmE3_Ncg/exec'; 
-        
 
-        // LOGIN FUNCTION
         function submitLogin(event) {
-            event.preventDefault(); 
+            event.preventDefault(); // Prevent page reload
             
             const submitBtn = document.getElementById('loginSubmitBtn');
-            const originalBtnText = submitBtn.innerHTML;
-            
-            submitBtn.innerHTML = "Saving...";
+            submitBtn.innerHTML = "Logging in...";
             submitBtn.disabled = true;
 
-            const formData = new FormData();
-            formData.append('name', document.getElementById('loginName').value);
-            formData.append('email', document.getElementById('loginEmail').value);
-            formData.append('password', document.getElementById('loginPassword').value);
-
-            fetch(SCRIPT_URL, { method: 'POST', body: formData })
-            .then(response => response.text())
-            .then(data => {
-                // Redirect to a new page! Make sure you create 'dashboard.html'
+            // Wait 500ms for visual effect, then redirect
+            setTimeout(() => {
                 window.location.href = "dashboard.html";
-            })
-            .catch(error => {
-                console.error('Error!', error.message);
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-                alert("There was an error saving your data.");
-            });
+            }, 500);
         }
 
-        // NEW: SIGNUP FUNCTION
         function submitSignup(event) {
-            event.preventDefault(); 
+            event.preventDefault(); // Prevent page reload
             
             const submitBtn = document.getElementById('signupSubmitBtn');
-            const originalBtnText = submitBtn.innerHTML;
-            
             submitBtn.innerHTML = "Creating Account...";
             submitBtn.disabled = true;
 
-            const formData = new FormData();
-            formData.append('name', document.getElementById('signupName').value);
-            formData.append('email', document.getElementById('signupEmail').value);
-            formData.append('password', document.getElementById('signupPassword').value);
-
-            fetch(SCRIPT_URL, { method: 'POST', body: formData })
-            .then(response => response.text())
-            .then(data => {
-                // Redirect to a new page! Make sure you create 'dashboard.html'
+            // Wait 500ms for visual effect, then redirect
+            setTimeout(() => {
                 window.location.href = "dashboard.html";
-            })
-            .catch(error => {
-                console.error('Error!', error.message);
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-                alert("There was an error saving your data.");
-            });
+            }, 500);
         }
     </script>
 </body>
