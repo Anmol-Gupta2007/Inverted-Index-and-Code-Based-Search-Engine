@@ -74,7 +74,6 @@
 
 <body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
 
-    <!-- Ambient Background Blobs -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
         <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
         <div class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-cyan-900/20 mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000" style="animation-delay: 2s;"></div>
@@ -123,15 +122,12 @@
 
         <div class="w-full max-w-3xl mx-auto">
             <div onclick="openModal('loginModal')" class="upload-zone relative flex flex-col items-center justify-center w-full h-72 rounded-3xl cursor-pointer overflow-hidden border-2 border-slate-700/50 border-dashed bg-slate-900/50 backdrop-blur-sm group">
-                
                 <div class="absolute top-0 left-0 w-16 h-16 bg-cyan-500/10 blur-2xl rounded-full"></div>
                 <div class="absolute bottom-0 right-0 w-16 h-16 bg-purple-500/10 blur-2xl rounded-full"></div>
-
                 <div class="absolute top-5 right-5 bg-slate-900/80 backdrop-blur-md border border-slate-700/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg z-20 group-hover:border-cyan-500/50 transition-colors">
                     <i data-lucide="lock" class="w-3.5 h-3.5 text-cyan-400"></i>
                     <span class="text-xs font-poppins font-medium text-slate-300 group-hover:text-cyan-100 transition-colors">Login Required</span>
                 </div>
-
                 <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-6 z-10">
                     <div class="p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:scale-110 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-all duration-300 mb-6">
                         <i data-lucide="cloud-upload" class="w-10 h-10 text-slate-400 group-hover:text-cyan-400 transition-colors"></i>
@@ -158,12 +154,10 @@
     <!-- Login Modal -->
     <div id="loginModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
-        
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="loginCard">
             <button onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            
             <div class="text-center mb-8">
                 <div class="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
                     <i data-lucide="lock" class="w-6 h-6 text-cyan-400"></i>
@@ -175,18 +169,11 @@
             <!-- LOGIN FORM -->
             <form id="loginForm" onsubmit="submitLogin(event)" class="space-y-5">
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
-                    <input type="text" id="loginName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="John Doe" required>
-                </div>
-                <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
                     <input type="email" id="loginEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block text-sm font-medium text-slate-300 font-inter">Password</label>
-                        <a href="#" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">Forgot password?</a>
-                    </div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Password</label>
                     <input type="password" id="loginPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="••••••••" required>
                 </div>
                 <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
@@ -202,12 +189,10 @@
     <!-- Signup Modal -->
     <div id="signupModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="signupBackdrop" onclick="closeModal('signupModal')"></div>
-        
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="signupCard">
             <button onclick="closeModal('signupModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-poppins font-bold text-white mb-2">Join Code Acer</h2>
                 <p class="text-slate-400">Start searching your codebase instantly</p>
@@ -247,12 +232,10 @@
             
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            
             void modal.offsetWidth;
             
             backdrop.classList.remove('opacity-0');
             backdrop.classList.add('opacity-100');
-            
             card.classList.remove('opacity-0', 'scale-95');
             card.classList.add('opacity-100', 'scale-100');
         }
@@ -264,7 +247,6 @@
             
             backdrop.classList.remove('opacity-100');
             backdrop.classList.add('opacity-0');
-            
             card.classList.remove('opacity-100', 'scale-100');
             card.classList.add('opacity-0', 'scale-95');
             
@@ -276,39 +258,77 @@
 
         function switchModal(closeId, openId) {
             closeModal(closeId);
-            setTimeout(() => {
-                openModal(openId);
-            }, 200); 
+            setTimeout(() => { openModal(openId); }, 200); 
         }
 
         // ==========================================
-        // REDIRECT LOGIC
+        // GOOGLE SHEETS API LOGIC
         // ==========================================
 
+        // ⚠️ PASTE YOUR *NEW* WEB APP URL HERE:
+        const SCRIPT_URL = 'YOUR_NEW_WEB_APP_URL_HERE';
+
         function submitLogin(event) {
-            event.preventDefault(); // Prevent page reload
-            
+            event.preventDefault(); 
             const submitBtn = document.getElementById('loginSubmitBtn');
-            submitBtn.innerHTML = "Logging in...";
+            const originalBtnText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = "Authenticating...";
             submitBtn.disabled = true;
 
-            // Wait 500ms for visual effect, then redirect
-            setTimeout(() => {
-                window.location.href = "dashboard.html";
-            }, 500);
+            const formData = new FormData();
+            formData.append('action', 'login');
+            formData.append('email', document.getElementById('loginEmail').value);
+            formData.append('password', document.getElementById('loginPassword').value);
+
+            fetch(SCRIPT_URL, { method: 'POST', body: formData })
+            .then(response => response.text())
+            .then(data => {
+                if (data === "Success") {
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert(data); // Will show "Invalid email or password"
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                alert("Server error. Please try again.");
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            });
         }
 
         function submitSignup(event) {
-            event.preventDefault(); // Prevent page reload
-            
+            event.preventDefault(); 
             const submitBtn = document.getElementById('signupSubmitBtn');
+            const originalBtnText = submitBtn.innerHTML;
+            
             submitBtn.innerHTML = "Creating Account...";
             submitBtn.disabled = true;
 
-            // Wait 500ms for visual effect, then redirect
-            setTimeout(() => {
-                window.location.href = "dashboard.html";
-            }, 500);
+            const formData = new FormData();
+            formData.append('action', 'signup');
+            formData.append('name', document.getElementById('signupName').value);
+            formData.append('email', document.getElementById('signupEmail').value);
+            formData.append('password', document.getElementById('signupPassword').value);
+
+            fetch(SCRIPT_URL, { method: 'POST', body: formData })
+            .then(response => response.text())
+            .then(data => {
+                if (data === "Success") {
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert(data); // Will show "Email already exists"
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                alert("Server error. Please try again.");
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            });
         }
     </script>
 </body>
