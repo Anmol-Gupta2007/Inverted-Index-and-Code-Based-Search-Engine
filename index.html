@@ -183,20 +183,25 @@
                 <p class="text-slate-400">Sign in to unlock file uploads</p>
             </div>
 
-            <form onsubmit="event.preventDefault();" class="space-y-5">
+            <!-- UPDATED FORM FOR GOOGLE SHEETS -->
+            <form id="loginForm" onsubmit="submitLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
+                    <input type="text" id="loginName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="John Doe" required>
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
-                    <input type="email" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
+                    <input type="email" id="loginEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <label class="block text-sm font-medium text-slate-300 font-inter">Password</label>
                         <a href="#" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">Forgot password?</a>
                     </div>
-                    <input type="password" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="••••••••" required>
+                    <input type="password" id="loginPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
-                    Sign in to Continue
+                <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4 flex justify-center items-center gap-2">
+                    <span>Sign in to Continue</span>
                 </button>
             </form>
             <p class="mt-8 text-center text-sm text-slate-400">
@@ -293,6 +298,52 @@
             setTimeout(() => {
                 openModal(openId);
             }, 200); // Slight overlap for smoother feel
+        }
+
+        // ==========================================
+        // GOOGLE SHEETS SUBMISSION LOGIC
+        // ==========================================
+        
+        // PASTE YOUR GOOGLE APPS SCRIPT URL HERE:
+        const SCRIPT_URL = 'YOUR_WEB_APP_URL_HERE'; 
+
+        function submitLogin(event) {
+            event.preventDefault(); // Prevent page reload
+            
+            const submitBtn = document.getElementById('loginSubmitBtn');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Show a loading state
+            submitBtn.innerHTML = "Saving...";
+            submitBtn.disabled = true;
+
+            // Gather the data
+            const formData = new FormData();
+            formData.append('name', document.getElementById('loginName').value);
+            formData.append('email', document.getElementById('loginEmail').value);
+            formData.append('password', document.getElementById('loginPassword').value);
+
+            // Send data to Google Sheets
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Reset form and UI on success
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+                document.getElementById('loginForm').reset();
+                
+                alert("Success! Data saved to Google Sheets.");
+                closeModal('loginModal');
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+                alert("There was an error saving your data.");
+            });
         }
     </script>
 </body>
