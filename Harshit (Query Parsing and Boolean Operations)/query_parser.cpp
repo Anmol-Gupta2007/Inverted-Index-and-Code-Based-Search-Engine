@@ -44,4 +44,27 @@ PostingNode* intersect_and(const PostingNode *p1, const PostingNode *p2) {
     }
     return head;
 }
+PostingNode* union_or(const PostingNode *p1, const PostingNode *p2) {
+    PostingNode *head = nullptr;
+    PostingNode *tail = nullptr;
+
+    while (p1 != nullptr || p2 != nullptr) {
+        PostingNode *new_node = nullptr;
+        if (p1 != nullptr && p2 != nullptr && p1->doc_id == p2->doc_id) {
+            new_node = create_node(p1->doc_id, p1->term_frequency + p2->term_frequency);
+            p1 = p1->next;
+            p2 = p2->next;
+        } else if (p2 == nullptr || (p1 != nullptr && p1->doc_id < p2->doc_id)) {
+            new_node = create_node(p1->doc_id, p1->term_frequency);
+            p1 = p1->next;
+        } else {
+            new_node = create_node(p2->doc_id, p2->term_frequency);
+            p2 = p2->next;
+        }
+        if (!head) head = new_node;
+        else tail->next = new_node;
+        tail = new_node;
+    }
+    return head;
+}
 }
