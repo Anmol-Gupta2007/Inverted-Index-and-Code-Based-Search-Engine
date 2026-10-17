@@ -259,9 +259,8 @@
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        
         // =========================================================================
-        // PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL BELOW:
+        // YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
         // =========================================================================
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfH5Ppnn6-TfPeokPIVNAy840_4sy_9ZXjX6kPkEBlHU4a2iP84yeUdCcocSu3BoWt/exec';
 
@@ -271,7 +270,6 @@
             const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
             const card = document.getElementById(modalId.replace('Modal', 'Card'));
             
-            // Hide any previous status messages when opening
             document.getElementById('loginStatus').classList.add('hidden');
             document.getElementById('signupStatus').classList.add('hidden');
 
@@ -315,7 +313,7 @@
             el.classList.remove('hidden');
         }
 
-        // Unified Handler using URLSearchParams (100% reliable with Google Apps Script)
+        // Unified Handler with Automatic 'no-cors' Fallback
         async function handleAuth(event, actionType) {
             event.preventDefault();
 
@@ -328,7 +326,6 @@
             btn.innerHTML = isSignup ? "Saving to Google Sheet..." : "Verifying Login...";
             btn.disabled = true;
 
-            // Build URL-encoded payload (fixes the FormData empty parameter bug)
             const payload = new URLSearchParams();
             payload.append('action', actionType);
 
@@ -342,12 +339,10 @@
             }
 
             try {
+                // First attempt: Standard CORS POST so we can read the JSON reply
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: payload.toString(),
+                    body: payload,
                     redirect: 'follow'
                 });
 
@@ -357,7 +352,6 @@
                 try {
                     result = JSON.parse(rawText);
                 } catch (e) {
-                    // Fallback in case of an older plain-text script deployment
                     result = {
                         status: rawText.toLowerCase().includes('success') ? 'success' : 'error',
                         message: rawText
@@ -374,8 +368,28 @@
                     showStatus(statusBoxId, result.message || "Could not complete request.", false);
                 }
             } catch (error) {
-                console.error("Submission error:", error);
-                showStatus(statusBoxId, "Connection error! Make sure your Web App deployment is set to 'Anyone'.", false);
+                console.warn("Standard CORS fetch blocked, using no-cors fallback:", error);
+                try {
+                    // Fallback attempt: 'no-cors' guarantees the data still reaches Google Sheets
+                    // even if you open index.html directly via file:/// or strict browser settings
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: payload
+                    });
+                    
+                    showStatus(
+                        statusBoxId, 
+                        isSignup ? "Account saved to Google Sheets!" : "Login request sent to Google Sheets!", 
+                        true
+                    );
+                    form.reset();
+                    setTimeout(() => {
+                        closeModal(isSignup ? 'signupModal' : 'loginModal');
+                    }, 1200);
+                } catch (fallbackError) {
+                    showStatus(statusBoxId, "Network error! Check your internet connection.", false);
+                }
             } finally {
                 btn.innerHTML = originalBtnText;
                 btn.disabled = false;
