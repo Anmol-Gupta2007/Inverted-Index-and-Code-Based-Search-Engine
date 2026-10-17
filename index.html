@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Acer | Next-Gen Code Search</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- Lucide Icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.260.0/lucide.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -38,11 +43,12 @@
 
     <style>
         body {
-            background-color: #020617;
+            background-color: #020617; /* slate-950 */
             color: #f8fafc;
             overflow-x: hidden;
         }
         
+        /* Glassmorphism Utilities */
         .glass {
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(16px);
@@ -57,15 +63,17 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
+        /* Upload Zone Hover Effects */
         .upload-zone {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .upload-zone:hover {
-            border-color: #06b6d4;
+            border-color: #06b6d4; /* cyan-500 */
             box-shadow: 0 0 30px rgba(6, 182, 212, 0.15) inset, 0 0 20px rgba(6, 182, 212, 0.2);
             background: rgba(6, 182, 212, 0.03);
         }
 
+        /* Custom Focus Ring */
         input:focus {
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
         }
@@ -74,14 +82,17 @@
 
 <body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
 
+    <!-- Ambient Background Blobs -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
         <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-cyan-900/20 mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000" style="animation-delay: 2s;"></div>
-        <div class="absolute bottom-[-20%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-blue-900/20 mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000" style="animation-delay: 4s;"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-cyan-900/20 mix-blend-screen filter blur-[100px] animate-blob" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-blue-900/20 mix-blend-screen filter blur-[100px] animate-blob" style="animation-delay: 4s;"></div>
     </div>
 
+    <!-- Navigation Bar -->
     <nav class="glass sticky top-0 z-40 w-full border-b border-white/5 shadow-lg">
         <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <!-- Logo -->
             <div class="flex items-center gap-3 cursor-pointer group">
                 <div class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow">
                     <i data-lucide="terminal-square" class="w-6 h-6 text-white"></i>
@@ -89,6 +100,7 @@
                 <span class="text-2xl font-poppins font-bold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-blue-500 transition-all">Code Acer</span>
             </div>
             
+            <!-- Auth Buttons -->
             <div class="flex items-center gap-6">
                 <button onclick="openModal('loginModal')" class="font-poppins font-medium text-slate-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-cyan-400 after:transition-all after:duration-300 hover:after:w-full">
                     Log in
@@ -100,12 +112,13 @@
         </div>
     </nav>
 
+    <!-- Main Hero & Upload Section -->
     <main class="flex-grow flex flex-col items-center justify-center px-4 z-10 relative mt-16 mb-20">
         <div class="text-center max-w-4xl mx-auto mb-16">
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 text-sm font-fira text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
                 <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
                 </span>
                 Secure Cloud Indexing
             </div>
@@ -120,14 +133,19 @@
             </p>
         </div>
 
+        <!-- Upload Zone -->
         <div class="w-full max-w-3xl mx-auto">
             <div onclick="openModal('loginModal')" class="upload-zone relative flex flex-col items-center justify-center w-full h-72 rounded-3xl cursor-pointer overflow-hidden border-2 border-slate-700/50 border-dashed bg-slate-900/50 backdrop-blur-sm group">
+                
                 <div class="absolute top-0 left-0 w-16 h-16 bg-cyan-500/10 blur-2xl rounded-full"></div>
                 <div class="absolute bottom-0 right-0 w-16 h-16 bg-purple-500/10 blur-2xl rounded-full"></div>
+
+                <!-- Lock Badge -->
                 <div class="absolute top-5 right-5 bg-slate-900/80 backdrop-blur-md border border-slate-700/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg z-20 group-hover:border-cyan-500/50 transition-colors">
                     <i data-lucide="lock" class="w-3.5 h-3.5 text-cyan-400"></i>
-                    <span class="text-xs font-poppins font-medium text-slate-300 group-hover:text-cyan-100 transition-colors">Login Required</span>
+                    <span id="lockBadgeText" class="text-xs font-poppins font-medium text-slate-300 group-hover:text-cyan-100 transition-colors">Login Required</span>
                 </div>
+
                 <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-6 z-10">
                     <div class="p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:scale-110 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-all duration-300 mb-6">
                         <i data-lucide="cloud-upload" class="w-10 h-10 text-slate-400 group-hover:text-cyan-400 transition-colors"></i>
@@ -143,14 +161,27 @@
         </div>
     </main>
 
-    <!-- Login Modal -->
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-white/5 bg-slate-950/50 backdrop-blur-lg z-10 py-8 relative">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-slate-500 font-inter text-sm flex items-center justify-center gap-2">
+                Created by Anmol Gupta, Harshit Kumar, Atharav Goyal, Navneet Nainwal
+            </p>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- LOGIN MODAL                                -->
+    <!-- ========================================== -->
     <div id="loginModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
+        
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="loginCard">
             <button onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            <div class="text-center mb-8">
+            
+            <div class="text-center mb-6">
                 <div class="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
                     <i data-lucide="lock" class="w-6 h-6 text-cyan-400"></i>
                 </div>
@@ -158,14 +189,18 @@
                 <p class="text-slate-400">Sign in to unlock file uploads</p>
             </div>
 
-            <!-- LOGIN FORM -->
-            <form id="loginForm" onsubmit="submitLogin(event)" class="space-y-5">
+            <!-- Status Message Box -->
+            <div id="loginStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
+
+            <form id="loginForm" onsubmit="handleAuth(event, 'login')" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
                     <input type="email" id="loginEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Password</label>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-medium text-slate-300 font-inter">Password</label>
+                    </div>
                     <input type="password" id="loginPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="••••••••" required>
                 </div>
                 <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
@@ -178,20 +213,26 @@
         </div>
     </div>
 
-    <!-- Signup Modal -->
+    <!-- ========================================== -->
+    <!-- SIGNUP MODAL                               -->
+    <!-- ========================================== -->
     <div id="signupModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="signupBackdrop" onclick="closeModal('signupModal')"></div>
+        
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="signupCard">
             <button onclick="closeModal('signupModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            <div class="text-center mb-8">
+            
+            <div class="text-center mb-6">
                 <h2 class="text-3xl font-poppins font-bold text-white mb-2">Join Code Acer</h2>
                 <p class="text-slate-400">Start searching your codebase instantly</p>
             </div>
 
-            <!-- SIGNUP FORM -->
-            <form id="signupForm" onsubmit="submitSignup(event)" class="space-y-5">
+            <!-- Status Message Box -->
+            <div id="signupStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
+
+            <form id="signupForm" onsubmit="handleAuth(event, 'signup')" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
                     <input type="text" id="signupName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="John Doe" required>
@@ -215,13 +256,24 @@
     </div>
 
     <script>
+        // Initialize Lucide Icons
         lucide.createIcons();
 
+        // =========================================================================
+        // PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL BELOW:
+        // =========================================================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzxJV3esNQyktvTVc4f6r0ZDuym-TfwIChUvJVXsg6xZrCSDEMOxQJ-OHbI6T97olzN/exec';
+
+        // Modal Transitions
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
             const card = document.getElementById(modalId.replace('Modal', 'Card'));
             
+            // Hide any previous status messages when opening
+            document.getElementById('loginStatus').classList.add('hidden');
+            document.getElementById('signupStatus').classList.add('hidden');
+
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             void modal.offsetWidth;
@@ -253,79 +305,80 @@
             setTimeout(() => { openModal(openId); }, 200); 
         }
 
-        // ==========================================
-        // GOOGLE SHEETS API LOGIC
-        // ==========================================
-
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIsZXkf7Ji_kyFkIkiuGrGkzOKNUPXqnpVGrm8kfx8tU-HC2CMcD_9DAg9e2keHsU/exec';
-
-        function submitLogin(event) {
-            event.preventDefault(); 
-            const submitBtn = document.getElementById('loginSubmitBtn');
-            const originalBtnText = submitBtn.innerHTML;
-            
-            submitBtn.innerHTML = "Authenticating...";
-            submitBtn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('action', 'login');
-            formData.append('email', document.getElementById('loginEmail').value);
-            formData.append('password', document.getElementById('loginPassword').value);
-
-            fetch(SCRIPT_URL, { method: 'POST', body: formData })
-            .then(response => response.text())
-            .then(data => {
-                // Check if the response includes "Success" instead of an exact match
-                if (data.includes("Success")) {
-                    alert("Login successful!");
-                    document.getElementById('loginForm').reset();
-                    closeModal('loginModal');
-                } else {
-                    alert(data); 
-                }
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-            })
-            .catch(error => {
-                alert("Server error. Please try again.");
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-            });
+        function showStatus(elementId, message, isSuccess) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = isSuccess 
+                ? "mb-4 p-3 rounded-xl text-sm font-inter text-center bg-emerald-500/20 border border-emerald-500/40 text-emerald-300"
+                : "mb-4 p-3 rounded-xl text-sm font-inter text-center bg-rose-500/20 border border-rose-500/40 text-rose-300";
+            el.classList.remove('hidden');
         }
 
-        function submitSignup(event) {
-            event.preventDefault(); 
-            const submitBtn = document.getElementById('signupSubmitBtn');
-            const originalBtnText = submitBtn.innerHTML;
-            
-            submitBtn.innerHTML = "Creating Account...";
-            submitBtn.disabled = true;
+        // Unified Handler using URLSearchParams (100% reliable with Google Apps Script)
+        async function handleAuth(event, actionType) {
+            event.preventDefault();
 
-            const formData = new FormData();
-            formData.append('action', 'signup');
-            formData.append('name', document.getElementById('signupName').value);
-            formData.append('email', document.getElementById('signupEmail').value);
-            formData.append('password', document.getElementById('signupPassword').value);
+            const isSignup = actionType === 'signup';
+            const btn = document.getElementById(isSignup ? 'signupSubmitBtn' : 'loginSubmitBtn');
+            const statusBoxId = isSignup ? 'signupStatus' : 'loginStatus';
+            const form = document.getElementById(isSignup ? 'signupForm' : 'loginForm');
+            const originalBtnText = btn.innerHTML;
 
-            fetch(SCRIPT_URL, { method: 'POST', body: formData })
-            .then(response => response.text())
-            .then(data => {
-                // Check if the response includes "Success" instead of an exact match
-                if (data.includes("Success")) {
-                    alert("Account successfully created!");
-                    document.getElementById('signupForm').reset();
-                    closeModal('signupModal');
-                } else {
-                    alert(data); 
+            btn.innerHTML = isSignup ? "Saving to Google Sheet..." : "Verifying Login...";
+            btn.disabled = true;
+
+            // Build URL-encoded payload (fixes the FormData empty parameter bug)
+            const payload = new URLSearchParams();
+            payload.append('action', actionType);
+
+            if (isSignup) {
+                payload.append('name', document.getElementById('signupName').value.trim());
+                payload.append('email', document.getElementById('signupEmail').value.trim());
+                payload.append('password', document.getElementById('signupPassword').value);
+            } else {
+                payload.append('email', document.getElementById('loginEmail').value.trim());
+                payload.append('password', document.getElementById('loginPassword').value);
+            }
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: payload.toString(),
+                    redirect: 'follow'
+                });
+
+                const rawText = await response.text();
+                let result;
+                
+                try {
+                    result = JSON.parse(rawText);
+                } catch (e) {
+                    // Fallback in case of an older plain-text script deployment
+                    result = {
+                        status: rawText.toLowerCase().includes('success') ? 'success' : 'error',
+                        message: rawText
+                    };
                 }
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-            })
-            .catch(error => {
-                alert("Server error. Please try again.");
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-            });
+
+                if (result.status === 'success') {
+                    showStatus(statusBoxId, result.message, true);
+                    form.reset();
+                    setTimeout(() => {
+                        closeModal(isSignup ? 'signupModal' : 'loginModal');
+                    }, 1200);
+                } else {
+                    showStatus(statusBoxId, result.message || "Could not complete request.", false);
+                }
+            } catch (error) {
+                console.error("Submission error:", error);
+                showStatus(statusBoxId, "Connection error! Make sure your Web App deployment is set to 'Anyone'.", false);
+            } finally {
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
