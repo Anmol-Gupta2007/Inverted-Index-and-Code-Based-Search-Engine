@@ -67,4 +67,24 @@ PostingNode* union_or(const PostingNode *p1, const PostingNode *p2) {
     }
     return head;
 }
+PostingNode* difference_not(const PostingNode *p1, const PostingNode *p2) {
+    PostingNode *head = nullptr;
+    PostingNode *tail = nullptr;
+    while (p1 != nullptr) {
+        if (p2 == nullptr || p1->doc_id < p2->doc_id) {
+            PostingNode *new_node = create_node(p1->doc_id, p1->term_frequency);
+            if (!head) head = new_node;
+            else tail->next = new_node;
+            tail = new_node;
+            p1 = p1->next;
+        } else if (p1->doc_id == p2->doc_id) {
+            p1 = p1->next;
+            p2 = p2->next;
+        } else {
+            p2 = p2->next;
+        }
+    }
+    return head;
+}
+
 }
