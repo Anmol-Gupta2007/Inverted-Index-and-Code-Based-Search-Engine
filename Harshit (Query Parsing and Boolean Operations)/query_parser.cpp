@@ -86,5 +86,11 @@ PostingNode* difference_not(const PostingNode *p1, const PostingNode *p2) {
     }
     return head;
 }
-
+void free_result_postings(PostingNode *head) {
+    while (head != nullptr) {
+        PostingNode *temp = head;
+        head = head->next;
+        free(temp);
+    }
+}
 }
