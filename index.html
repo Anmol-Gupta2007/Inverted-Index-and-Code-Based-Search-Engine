@@ -312,26 +312,13 @@
         lucide.createIcons();
 
         // =========================================================================
-        // YOUR NEW GOOGLE APPS SCRIPT WEB APP URL:
+        // PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT URL HERE:
         // =========================================================================
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0PYTKuYBI1xrgh9Mh_A1tAJUg5IKxAY96sYzRF8kbR5ETWDN50PUV9YyWUn84d8KH/exec';
 
         // Track login attempts (Max 5)
         let loginAttempts = 0;
         const MAX_LOGIN_ATTEMPTS = 5;
-
-        // Local cache for instant validation if browser blocks reading cross-origin responses
-        function getLocalUsers() {
-            try { return JSON.parse(localStorage.getItem('code_acer_users') || '{}'); } 
-            catch (e) { return {}; }
-        }
-        function saveLocalUser(email, name, password, count) {
-            try {
-                const users = getLocalUsers();
-                users[email.toLowerCase()] = { name, password, count: count || 1 };
-                localStorage.setItem('code_acer_users', JSON.stringify(users));
-            } catch (e) {}
-        }
 
         // Modal Transitions
         function openModal(modalId) {
@@ -392,12 +379,14 @@
         }
 
         // =========================================================================
-        // DIRECT GOOGLE SHEET SENDER (JSONP + Guaranteed no-cors POST)
+        // REAL GOOGLE SHEET REQUEST (Logs exact URL to F12 Console for verification)
         // =========================================================================
         async function sendSheetRequest(params) {
             const query = new URLSearchParams(params);
+            const fullTestUrl = SCRIPT_URL + '?' + query.toString();
+            console.log("Sending to Google Sheet URL:", fullTestUrl);
 
-            // Step 1: Try JSONP first (Reads exact Google Sheet reply if script is deployed with doGet)
+            // Attempt 1: JSONP (Works across all origins & file:///)
             try {
                 return await new Promise((resolve, reject) => {
                     const callbackName = 'jsonp_cb_' + Math.round(1000000 * Math.random());
@@ -405,7 +394,7 @@
                     const timeout = setTimeout(() => {
                         cleanup();
                         reject(new Error('JSONP Timeout'));
-                    }, 3500);
+                    }, 8000);
 
                     function cleanup() {
                         clearTimeout(timeout);
@@ -415,6 +404,7 @@
 
                     window[callbackName] = function(data) {
                         cleanup();
+                        console.log("Response from Google Sheet:", data);
                         resolve(data);
                     };
 
@@ -423,59 +413,16 @@
                     script.src = SCRIPT_URL + '?' + jsonpQuery.toString();
                     script.onerror = () => {
                         cleanup();
-                        reject(new Error('JSONP Error'));
+                        reject(new Error('JSONP failed to load'));
                     };
                     document.body.appendChild(script);
                 });
-            } catch (err) {
-                // Step 2: If JSONP is blocked or times out, send a real no-cors POST request!
-                // Unlike iframes (which Google blocks with X-Frame-Options), no-cors POST 
-                // ALWAYS reaches doPost(e) in Google Apps Script!
-                const formData = new FormData();
-                for (const key in params) {
-                    formData.append(key, params[key]);
-                }
-
-                try {
-                    await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: formData
-                    });
-                } catch (postErr) {
-                    // Backup GET ping via Image beacon
-                    const img = new Image();
-                    img.src = SCRIPT_URL + '?' + query.toString();
-                }
-
-                // Validate locally so UI rules still work 100% accurately
-                const users = getLocalUsers();
-                const emailKey = (params.email || '').toLowerCase();
-
-                if (params.action === 'signup') {
-                    if (users[emailKey]) {
-                        return { status: 'error', message: 'Account already there' };
-                    }
-                    saveLocalUser(emailKey, params.name, params.password, 1);
-                    return { status: 'success', message: 'Account created and saved to Google Sheets!' };
-                }
-
-                if (params.action === 'login') {
-                    if (users[emailKey] && users[emailKey].password === params.password) {
-                        users[emailKey].count = (users[emailKey].count || 1) + 1;
-                        if (params.name) users[emailKey].name = params.name;
-                        saveLocalUser(emailKey, users[emailKey].name, params.password, users[emailKey].count);
-                        return { status: 'success', message: `Login successful! Welcome, ${params.name || users[emailKey].name} (Login #${users[emailKey].count})` };
-                    }
-                    return { status: 'error', message: 'you entered wrong password or mail' };
-                }
-
-                if (params.action === 'reset') {
-                    const existingName = users[emailKey] ? users[emailKey].name : 'User';
-                    const existingCount = users[emailKey] ? users[emailKey].count : 1;
-                    saveLocalUser(emailKey, existingName, params.password, existingCount);
-                    return { status: 'success', message: 'Password updated successfully in Google Sheets!' };
-                }
+            } catch (jsonpErr) {
+                console.warn("JSONP failed, trying standard Fetch:", jsonpErr);
+                // Attempt 2: Standard Fetch GET
+                const res = await fetch(fullTestUrl, { method: 'GET', redirect: 'follow' });
+                const text = await res.text();
+                return JSON.parse(text);
             }
         }
 
@@ -499,34 +446,39 @@
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            const result = await sendSheetRequest({
-                action: 'login',
-                name: name,
-                email: email,
-                password: password
-            });
+            try {
+                const result = await sendSheetRequest({
+                    action: 'login',
+                    name: name,
+                    email: email,
+                    password: password
+                });
 
-            if (result && result.status === 'success') {
-                loginAttempts = 0;
-                saveLocalUser(email, name, password, 1);
-                showStatus('loginStatus', result.message, true);
-                document.getElementById('loginForm').reset();
-                setTimeout(() => closeModal('loginModal'), 1200);
-            } else {
-                loginAttempts++;
-                const remaining = MAX_LOGIN_ATTEMPTS - loginAttempts;
-
-                if (remaining <= 0) {
-                    showStatus('loginStatus', 'you entered wrong password or mail (0 attempts left - Login Locked)', false);
-                    document.getElementById('loginName').disabled = true;
-                    document.getElementById('loginEmail').disabled = true;
-                    document.getElementById('loginPassword').disabled = true;
-                    btn.innerHTML = "Locked (Max 5 Attempts)";
-                    btn.disabled = true;
-                    return;
+                if (result && result.status === 'success') {
+                    loginAttempts = 0;
+                    showStatus('loginStatus', result.message, true);
+                    document.getElementById('loginForm').reset();
+                    setTimeout(() => closeModal('loginModal'), 1200);
+                } else if (result && result.message && result.message.startsWith('Script Error:')) {
+                    showStatus('loginStatus', result.message, false);
                 } else {
-                    showStatus('loginStatus', `you entered wrong password or mail (Attempt ${loginAttempts}/${MAX_LOGIN_ATTEMPTS})`, false);
+                    loginAttempts++;
+                    const remaining = MAX_LOGIN_ATTEMPTS - loginAttempts;
+
+                    if (remaining <= 0) {
+                        showStatus('loginStatus', 'you entered wrong password or mail (0 attempts left - Login Locked)', false);
+                        document.getElementById('loginName').disabled = true;
+                        document.getElementById('loginEmail').disabled = true;
+                        document.getElementById('loginPassword').disabled = true;
+                        btn.innerHTML = "Locked (Max 5 Attempts)";
+                        btn.disabled = true;
+                        return;
+                    } else {
+                        showStatus('loginStatus', `you entered wrong password or mail (Attempt ${loginAttempts}/${MAX_LOGIN_ATTEMPTS})`, false);
+                    }
                 }
+            } catch (err) {
+                showStatus('loginStatus', 'Could not reach Google Script! Open F12 Console and click the logged URL to see why.', false);
             }
 
             if (loginAttempts < MAX_LOGIN_ATTEMPTS) {
@@ -550,24 +502,27 @@
             const email = document.getElementById('signupEmail').value.trim();
             const password = document.getElementById('signupPassword').value;
 
-            const result = await sendSheetRequest({
-                action: 'signup',
-                name: name,
-                email: email,
-                password: password
-            });
+            try {
+                const result = await sendSheetRequest({
+                    action: 'signup',
+                    name: name,
+                    email: email,
+                    password: password
+                });
 
-            if (result && result.status === 'success') {
-                saveLocalUser(email, name, password, 1);
-                showStatus('signupStatus', result.message, true);
-                document.getElementById('signupForm').reset();
-                setTimeout(() => closeModal('signupModal'), 1200);
-            } else {
-                showStatus('signupStatus', (result && result.message) ? result.message : 'Account already there', false);
+                if (result && result.status === 'success') {
+                    showStatus('signupStatus', result.message, true);
+                    document.getElementById('signupForm').reset();
+                    setTimeout(() => closeModal('signupModal'), 1200);
+                } else {
+                    showStatus('signupStatus', (result && result.message) ? result.message : 'Account already there', false);
+                }
+            } catch (err) {
+                showStatus('signupStatus', 'Could not reach Google Script! Open F12 Console and click the logged URL to see why.', false);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
         }
 
         // =========================================================================
@@ -590,30 +545,33 @@
             btn.innerHTML = "Updating Password...";
             btn.disabled = true;
 
-            const result = await sendSheetRequest({
-                action: 'reset',
-                email: email,
-                password: newPassword
-            });
+            try {
+                const result = await sendSheetRequest({
+                    action: 'reset',
+                    email: email,
+                    password: newPassword
+                });
 
-            if (result && result.status === 'success') {
-                // Unlock login form if it was previously locked after 5 failed attempts
-                loginAttempts = 0;
-                document.getElementById('loginName').disabled = false;
-                document.getElementById('loginEmail').disabled = false;
-                document.getElementById('loginPassword').disabled = false;
-                document.getElementById('loginSubmitBtn').disabled = false;
-                document.getElementById('loginSubmitBtn').innerHTML = "Sign in to Continue";
+                if (result && result.status === 'success') {
+                    loginAttempts = 0;
+                    document.getElementById('loginName').disabled = false;
+                    document.getElementById('loginEmail').disabled = false;
+                    document.getElementById('loginPassword').disabled = false;
+                    document.getElementById('loginSubmitBtn').disabled = false;
+                    document.getElementById('loginSubmitBtn').innerHTML = "Sign in to Continue";
 
-                showStatus('forgotStatus', result.message, true);
-                document.getElementById('forgotForm').reset();
-                setTimeout(() => switchModal('forgotModal', 'loginModal'), 1200);
-            } else {
-                showStatus('forgotStatus', (result && result.message) ? result.message : 'Email not found!', false);
+                    showStatus('forgotStatus', result.message, true);
+                    document.getElementById('forgotForm').reset();
+                    setTimeout(() => switchModal('forgotModal', 'loginModal'), 1200);
+                } else {
+                    showStatus('forgotStatus', (result && result.message) ? result.message : 'Email not found!', false);
+                }
+            } catch (err) {
+                showStatus('forgotStatus', 'Could not reach Google Script! Open F12 Console and click the logged URL to see why.', false);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
         }
     </script>
 </body>
