@@ -82,9 +82,6 @@
 
 <body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
 
-    <!-- HIDDEN IFRAME: Allows 100% unblockable form submission to Google Sheets -->
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
     <!-- Ambient Background Blobs -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
         <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
@@ -174,7 +171,7 @@
     </footer>
 
     <!-- ========================================== -->
-    <!-- LOGIN MODAL                                -->
+    <!-- 1. LOGIN MODAL                             -->
     <!-- ========================================== -->
     <div id="loginModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
@@ -195,38 +192,36 @@
             <!-- Status Message Box -->
             <div id="loginStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
 
-            <!-- NATIVE FORM TARGETING HIDDEN IFRAME -->
-            <form id="loginForm" 
-                  action="https://script.google.com/macros/s/AKfycbwfH5Ppnn6-TfPeokPIVNAy840_4sy_9ZXjX6kPkEBlHU4a2iP84yeUdCcocSu3BoWt/exec" 
-                  method="GET" 
-                  target="hidden_iframe" 
-                  onsubmit="submitViaIframe('login')" 
-                  class="space-y-5">
-                
-                <input type="hidden" name="action" value="login">
-                
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
-                    <input type="email" name="email" id="loginEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Full Name</label>
+                    <input type="text" id="loginName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="John Doe" required>
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-2">
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Email address</label>
+                    <input type="email" id="loginEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
                         <label class="block text-sm font-medium text-slate-300 font-inter">Password</label>
+                        <button type="button" onclick="openForgotModal()" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-inter">
+                            Forgot password?
+                        </button>
                     </div>
-                    <input type="password" name="password" id="loginPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="••••••••" required>
+                    <input type="password" id="loginPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="••••••••" required>
                 </div>
-                <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
+                <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-2">
                     Sign in to Continue
                 </button>
             </form>
-            <p class="mt-8 text-center text-sm text-slate-400">
+            <p class="mt-6 text-center text-sm text-slate-400">
                 New to Code Acer? <button onclick="switchModal('loginModal', 'signupModal')" class="text-white font-medium hover:text-cyan-400 transition-colors ml-1">Create an account</button>
             </p>
         </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- SIGNUP MODAL                               -->
+    <!-- 2. SIGNUP MODAL                            -->
     <!-- ========================================== -->
     <div id="signupModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="signupBackdrop" onclick="closeModal('signupModal')"></div>
@@ -244,27 +239,18 @@
             <!-- Status Message Box -->
             <div id="signupStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
 
-            <!-- NATIVE FORM TARGETING HIDDEN IFRAME -->
-            <form id="signupForm" 
-                  action="https://script.google.com/macros/s/AKfycbwfH5Ppnn6-TfPeokPIVNAy840_4sy_9ZXjX6kPkEBlHU4a2iP84yeUdCcocSu3BoWt/exec" 
-                  method="GET" 
-                  target="hidden_iframe" 
-                  onsubmit="submitViaIframe('signup')" 
-                  class="space-y-5">
-                
-                <input type="hidden" name="action" value="signup">
-
+            <form id="signupForm" onsubmit="handleSignup(event)" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
-                    <input type="text" name="name" id="signupName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="John Doe" required>
+                    <input type="text" id="signupName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="John Doe" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
-                    <input type="email" name="email" id="signupEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="name@company.com" required>
+                    <input type="email" id="signupEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Password</label>
-                    <input type="password" name="password" id="signupPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="Create a strong password" required>
+                    <input type="password" id="signupPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="Create a strong password" required>
                 </div>
                 <button type="submit" id="signupSubmitBtn" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
                     Create Account
@@ -276,9 +262,63 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- 3. FORGOT PASSWORD MODAL                   -->
+    <!-- ========================================== -->
+    <div id="forgotModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
+        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="forgotBackdrop" onclick="closeModal('forgotModal')"></div>
+        
+        <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="forgotCard">
+            <button onclick="closeModal('forgotModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
+                    <i data-lucide="key-round" class="w-6 h-6 text-cyan-400"></i>
+                </div>
+                <h2 class="text-3xl font-poppins font-bold text-white mb-2">Reset Password</h2>
+                <p class="text-slate-400">Enter your email and a new password</p>
+            </div>
+
+            <!-- Status Message Box -->
+            <div id="forgotStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
+
+            <form id="forgotForm" onsubmit="handleResetPassword(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Registered Email address</label>
+                    <input type="email" id="forgotEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">New Password</label>
+                    <input type="password" id="forgotNewPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="Enter new password" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Confirm New Password</label>
+                    <input type="password" id="forgotConfirmPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="Confirm new password" required>
+                </div>
+                <button type="submit" id="forgotSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-2">
+                    Update Password
+                </button>
+            </form>
+            <p class="mt-6 text-center text-sm text-slate-400">
+                Remembered your password? <button onclick="switchModal('forgotModal', 'loginModal')" class="text-white font-medium hover:text-cyan-400 transition-colors ml-1">Back to Log in</button>
+            </p>
+        </div>
+    </div>
+
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
+
+        // =========================================================================
+        // YOUR DEPLOYED GOOGLE APPS SCRIPT URL:
+        // =========================================================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfH5Ppnn6-TfPeokPIVNAy840_4sy_9ZXjX6kPkEBlHU4a2iP84yeUdCcocSu3BoWt/exec';
+
+        // Track login attempts (Max 5)
+        let loginAttempts = 0;
+        const MAX_LOGIN_ATTEMPTS = 5;
 
         // Modal Transitions
         function openModal(modalId) {
@@ -286,8 +326,9 @@
             const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
             const card = document.getElementById(modalId.replace('Modal', 'Card'));
             
-            document.getElementById('loginStatus').classList.add('hidden');
-            document.getElementById('signupStatus').classList.add('hidden');
+            if (modalId !== 'loginModal' || loginAttempts < MAX_LOGIN_ATTEMPTS) {
+                document.getElementById(modalId.replace('Modal', 'Status')).classList.add('hidden');
+            }
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -320,38 +361,206 @@
             setTimeout(() => { openModal(openId); }, 200); 
         }
 
-        function showStatus(elementId, message) {
+        function openForgotModal() {
+            // Pre-fill email if the user already typed it in the login box
+            const currentLoginEmail = document.getElementById('loginEmail').value.trim();
+            if (currentLoginEmail) {
+                document.getElementById('forgotEmail').value = currentLoginEmail;
+            }
+            switchModal('loginModal', 'forgotModal');
+        }
+
+        function showStatus(elementId, message, isSuccess) {
             const el = document.getElementById(elementId);
             el.textContent = message;
-            el.className = "mb-4 p-3 rounded-xl text-sm font-inter text-center bg-emerald-500/20 border border-emerald-500/40 text-emerald-300";
+            el.className = isSuccess 
+                ? "mb-4 p-3 rounded-xl text-sm font-inter text-center bg-emerald-500/20 border border-emerald-500/40 text-emerald-300"
+                : "mb-4 p-3 rounded-xl text-sm font-inter text-center bg-rose-500/20 border border-rose-500/40 text-rose-300";
             el.classList.remove('hidden');
         }
 
-        // Native Iframe Form Submission Handler (Never blocked by CORS or AdBlockers)
-        function submitViaIframe(type) {
-            const isSignup = type === 'signup';
-            const btn = document.getElementById(isSignup ? 'signupSubmitBtn' : 'loginSubmitBtn');
-            const statusBoxId = isSignup ? 'signupStatus' : 'loginStatus';
-            const form = document.getElementById(isSignup ? 'signupForm' : 'loginForm');
-            const originalText = btn.innerHTML;
+        // =========================================================================
+        // UNBLOCKABLE JSONP REQUEST HELPER (Reads exact response from Google Sheet)
+        // =========================================================================
+        function sendSheetRequest(params) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
+                const script = document.createElement('script');
+                
+                const timeout = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('Request timed out'));
+                }, 12000);
 
-            btn.innerHTML = isSignup ? "Saving to Google Sheet..." : "Logging in...";
+                function cleanup() {
+                    clearTimeout(timeout);
+                    delete window[callbackName];
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+
+                window[callbackName] = function(data) {
+                    cleanup();
+                    resolve(data);
+                };
+
+                const query = new URLSearchParams(params);
+                query.append('callback', callbackName);
+                script.src = SCRIPT_URL + '?' + query.toString();
+                script.onerror = () => {
+                    cleanup();
+                    reject(new Error('Script load error'));
+                };
+
+                document.body.appendChild(script);
+            });
+        }
+
+        // =========================================================================
+        // 1. LOGIN HANDLER (With 5-Attempt Limit)
+        // =========================================================================
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+                showStatus('loginStatus', 'Maximum 5 login attempts reached! Please reset your password.', false);
+                return;
+            }
+
+            const btn = document.getElementById('loginSubmitBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Verifying...";
             btn.disabled = true;
 
-            // Allow native form submission to complete in the background iframe
-            setTimeout(() => {
-                showStatus(
-                    statusBoxId, 
-                    isSignup ? "Account created and saved to Google Sheets!" : "Login recorded in Google Sheets!"
-                );
+            const name = document.getElementById('loginName').value.trim();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const result = await sendSheetRequest({
+                    action: 'login',
+                    name: name,
+                    email: email,
+                    password: password
+                });
+
+                if (result.status === 'success') {
+                    loginAttempts = 0; // Reset attempts on success
+                    showStatus('loginStatus', result.message, true);
+                    document.getElementById('loginForm').reset();
+                    setTimeout(() => closeModal('loginModal'), 1200);
+                } else {
+                    loginAttempts++;
+                    const remaining = MAX_LOGIN_ATTEMPTS - loginAttempts;
+
+                    if (remaining <= 0) {
+                        showStatus('loginStatus', 'you entered wrong password or mail (0 attempts left - Login Locked)', false);
+                        document.getElementById('loginName').disabled = true;
+                        document.getElementById('loginEmail').disabled = true;
+                        document.getElementById('loginPassword').disabled = true;
+                        btn.innerHTML = "Locked (Max 5 Attempts)";
+                        btn.disabled = true;
+                        return;
+                    } else {
+                        showStatus('loginStatus', `you entered wrong password or mail (Attempt ${loginAttempts}/${MAX_LOGIN_ATTEMPTS})`, false);
+                    }
+                }
+            } catch (err) {
+                showStatus('loginStatus', 'Error connecting to Google Sheet. Make sure you deployed the new version!', false);
+            }
+
+            if (loginAttempts < MAX_LOGIN_ATTEMPTS) {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-                form.reset();
+            }
+        }
 
-                setTimeout(() => {
-                    closeModal(isSignup ? 'signupModal' : 'loginModal');
-                }, 1200);
-            }, 1200);
+        // =========================================================================
+        // 2. SIGNUP HANDLER (Checks for "Account already there")
+        // =========================================================================
+        async function handleSignup(event) {
+            event.preventDefault();
+
+            const btn = document.getElementById('signupSubmitBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Checking & Saving...";
+            btn.disabled = true;
+
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const result = await sendSheetRequest({
+                    action: 'signup',
+                    name: name,
+                    email: email,
+                    password: password
+                });
+
+                if (result.status === 'success') {
+                    showStatus('signupStatus', result.message, true);
+                    document.getElementById('signupForm').reset();
+                    setTimeout(() => closeModal('signupModal'), 1200);
+                } else {
+                    // Displays "Account already there"
+                    showStatus('signupStatus', result.message, false);
+                }
+            } catch (err) {
+                showStatus('signupStatus', 'Error connecting to Google Sheet. Make sure you deployed the new version!', false);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // =========================================================================
+        // 3. FORGOT PASSWORD HANDLER (Updates password in Google Sheet)
+        // =========================================================================
+        async function handleResetPassword(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('forgotEmail').value.trim();
+            const newPassword = document.getElementById('forgotNewPassword').value;
+            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showStatus('forgotStatus', 'New password and Confirm password do not match!', false);
+                return;
+            }
+
+            const btn = document.getElementById('forgotSubmitBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Updating Password...";
+            btn.disabled = true;
+
+            try {
+                const result = await sendSheetRequest({
+                    action: 'reset',
+                    email: email,
+                    password: newPassword
+                });
+
+                if (result.status === 'success') {
+                    // Unlock login form if it was previously locked after 5 failed attempts
+                    loginAttempts = 0;
+                    document.getElementById('loginName').disabled = false;
+                    document.getElementById('loginEmail').disabled = false;
+                    document.getElementById('loginPassword').disabled = false;
+                    document.getElementById('loginSubmitBtn').disabled = false;
+                    document.getElementById('loginSubmitBtn').innerHTML = "Sign in to Continue";
+
+                    showStatus('forgotStatus', result.message, true);
+                    document.getElementById('forgotForm').reset();
+                    setTimeout(() => switchModal('forgotModal', 'loginModal'), 1200);
+                } else {
+                    showStatus('forgotStatus', result.message, false);
+                }
+            } catch (err) {
+                showStatus('forgotStatus', 'Error connecting to Google Sheet. Make sure you deployed the new version!', false);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
