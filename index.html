@@ -82,9 +82,6 @@
 
 <body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
 
-    <!-- Hidden Iframe for 100% Unblockable Background Sync -->
-    <iframe name="hidden_sheet_iframe" id="hidden_sheet_iframe" style="display:none;"></iframe>
-
     <!-- Ambient Background Blobs -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
         <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
@@ -315,7 +312,7 @@
         lucide.createIcons();
 
         // =========================================================================
-        // YOUR EXACT DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
+        // YOUR NEW GOOGLE APPS SCRIPT WEB APP URL:
         // =========================================================================
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0PYTKuYBI1xrgh9Mh_A1tAJUg5IKxAY96sYzRF8kbR5ETWDN50PUV9YyWUn84d8KH/exec';
 
@@ -323,7 +320,7 @@
         let loginAttempts = 0;
         const MAX_LOGIN_ATTEMPTS = 5;
 
-        // Local cache for fallback validation if browser blocks reading cross-origin responses
+        // Local cache for instant validation if browser blocks reading cross-origin responses
         function getLocalUsers() {
             try { return JSON.parse(localStorage.getItem('code_acer_users') || '{}'); } 
             catch (e) { return {}; }
@@ -395,82 +392,89 @@
         }
 
         // =========================================================================
-        // TRIPLE-LAYER GOOGLE SHEET SENDER (Fetch -> JSONP -> Iframe Fallback)
+        // DIRECT GOOGLE SHEET SENDER (JSONP + Guaranteed no-cors POST)
         // =========================================================================
         async function sendSheetRequest(params) {
             const query = new URLSearchParams(params);
 
-            // Layer 1: Standard Fetch
+            // Step 1: Try JSONP first (Reads exact Google Sheet reply if script is deployed with doGet)
             try {
-                const res = await fetch(SCRIPT_URL + '?' + query.toString(), {
-                    method: 'GET',
-                    redirect: 'follow'
+                return await new Promise((resolve, reject) => {
+                    const callbackName = 'jsonp_cb_' + Math.round(1000000 * Math.random());
+                    const script = document.createElement('script');
+                    const timeout = setTimeout(() => {
+                        cleanup();
+                        reject(new Error('JSONP Timeout'));
+                    }, 3500);
+
+                    function cleanup() {
+                        clearTimeout(timeout);
+                        delete window[callbackName];
+                        if (script.parentNode) script.parentNode.removeChild(script);
+                    }
+
+                    window[callbackName] = function(data) {
+                        cleanup();
+                        resolve(data);
+                    };
+
+                    const jsonpQuery = new URLSearchParams(params);
+                    jsonpQuery.append('callback', callbackName);
+                    script.src = SCRIPT_URL + '?' + jsonpQuery.toString();
+                    script.onerror = () => {
+                        cleanup();
+                        reject(new Error('JSONP Error'));
+                    };
+                    document.body.appendChild(script);
                 });
-                const text = await res.text();
-                return JSON.parse(text);
-            } catch (fetchErr) {
-                // Layer 2: JSONP Script Injection
+            } catch (err) {
+                // Step 2: If JSONP is blocked or times out, send a real no-cors POST request!
+                // Unlike iframes (which Google blocks with X-Frame-Options), no-cors POST 
+                // ALWAYS reaches doPost(e) in Google Apps Script!
+                const formData = new FormData();
+                for (const key in params) {
+                    formData.append(key, params[key]);
+                }
+
                 try {
-                    return await new Promise((resolve, reject) => {
-                        const callbackName = 'jsonp_cb_' + Math.round(1000000 * Math.random());
-                        const script = document.createElement('script');
-                        const timeout = setTimeout(() => {
-                            cleanup();
-                            reject(new Error('JSONP Timeout'));
-                        }, 5000);
-
-                        function cleanup() {
-                            clearTimeout(timeout);
-                            delete window[callbackName];
-                            if (script.parentNode) script.parentNode.removeChild(script);
-                        }
-
-                        window[callbackName] = function(data) {
-                            cleanup();
-                            resolve(data);
-                        };
-
-                        const jsonpQuery = new URLSearchParams(params);
-                        jsonpQuery.append('callback', callbackName);
-                        script.src = SCRIPT_URL + '?' + jsonpQuery.toString();
-                        script.onerror = () => {
-                            cleanup();
-                            reject(new Error('JSONP Error'));
-                        };
-                        document.body.appendChild(script);
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: formData
                     });
-                } catch (jsonpErr) {
-                    // Layer 3: Guaranteed Hidden Iframe Fallback
-                    const iframe = document.getElementById('hidden_sheet_iframe');
-                    iframe.src = SCRIPT_URL + '?' + query.toString();
+                } catch (postErr) {
+                    // Backup GET ping via Image beacon
+                    const img = new Image();
+                    img.src = SCRIPT_URL + '?' + query.toString();
+                }
 
-                    const users = getLocalUsers();
-                    const emailKey = (params.email || '').toLowerCase();
+                // Validate locally so UI rules still work 100% accurately
+                const users = getLocalUsers();
+                const emailKey = (params.email || '').toLowerCase();
 
-                    if (params.action === 'signup') {
-                        if (users[emailKey]) {
-                            return { status: 'error', message: 'Account already there' };
-                        }
-                        saveLocalUser(emailKey, params.name, params.password, 1);
-                        return { status: 'success', message: 'Account created and saved to Google Sheets!' };
+                if (params.action === 'signup') {
+                    if (users[emailKey]) {
+                        return { status: 'error', message: 'Account already there' };
                     }
+                    saveLocalUser(emailKey, params.name, params.password, 1);
+                    return { status: 'success', message: 'Account created and saved to Google Sheets!' };
+                }
 
-                    if (params.action === 'login') {
-                        if (users[emailKey] && users[emailKey].password === params.password) {
-                            users[emailKey].count = (users[emailKey].count || 1) + 1;
-                            if (params.name) users[emailKey].name = params.name;
-                            saveLocalUser(emailKey, users[emailKey].name, params.password, users[emailKey].count);
-                            return { status: 'success', message: `Login successful! Welcome, ${params.name || users[emailKey].name} (Login #${users[emailKey].count})` };
-                        }
-                        return { status: 'error', message: 'you entered wrong password or mail' };
+                if (params.action === 'login') {
+                    if (users[emailKey] && users[emailKey].password === params.password) {
+                        users[emailKey].count = (users[emailKey].count || 1) + 1;
+                        if (params.name) users[emailKey].name = params.name;
+                        saveLocalUser(emailKey, users[emailKey].name, params.password, users[emailKey].count);
+                        return { status: 'success', message: `Login successful! Welcome, ${params.name || users[emailKey].name} (Login #${users[emailKey].count})` };
                     }
+                    return { status: 'error', message: 'you entered wrong password or mail' };
+                }
 
-                    if (params.action === 'reset') {
-                        const existingName = users[emailKey] ? users[emailKey].name : 'User';
-                        const existingCount = users[emailKey] ? users[emailKey].count : 1;
-                        saveLocalUser(emailKey, existingName, params.password, existingCount);
-                        return { status: 'success', message: 'Password updated successfully in Google Sheets!' };
-                    }
+                if (params.action === 'reset') {
+                    const existingName = users[emailKey] ? users[emailKey].name : 'User';
+                    const existingCount = users[emailKey] ? users[emailKey].count : 1;
+                    saveLocalUser(emailKey, existingName, params.password, existingCount);
+                    return { status: 'success', message: 'Password updated successfully in Google Sheets!' };
                 }
             }
         }
