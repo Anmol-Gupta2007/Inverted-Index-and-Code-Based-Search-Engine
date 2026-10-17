@@ -17,3 +17,4 @@ void free_result_postings(PostingNode *head);
 std::vector<std::string> tokenize_query(const std::string &raw_query);
 #endif
 #endif
+
