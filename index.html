@@ -143,14 +143,6 @@
         </div>
     </main>
 
-    <footer class="mt-auto border-t border-white/5 bg-slate-950/50 backdrop-blur-lg z-10 py-8 relative">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-slate-500 font-inter text-sm flex items-center justify-center gap-2">
-                Created by Anmol Gupta, Harshit Kumar, Atharav Goyal, Navneet Nainwal
-            </p>
-        </div>
-    </footer>
-
     <!-- Login Modal -->
     <div id="loginModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
@@ -265,7 +257,6 @@
         // GOOGLE SHEETS API LOGIC
         // ==========================================
 
-        // ⚠️ PASTE YOUR *NEW* WEB APP URL HERE:
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztfsVD8Ybgy-RMbazJTCXh-zufcfxL1mp52BK0Bm4UvSJA4paSDQRq5aFqhrIIe1FW/exec';
 
         function submitLogin(event) {
@@ -284,13 +275,16 @@
             fetch(SCRIPT_URL, { method: 'POST', body: formData })
             .then(response => response.text())
             .then(data => {
-                if (data === "Success") {
-                    window.location.href = "dashboard.html";
+                // Check if the response includes "Success" instead of an exact match
+                if (data.includes("Success")) {
+                    alert("Login successful!");
+                    document.getElementById('loginForm').reset();
+                    closeModal('loginModal');
                 } else {
-                    alert(data); // Will show "Invalid email or password"
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
+                    alert(data); 
                 }
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
             })
             .catch(error => {
                 alert("Server error. Please try again.");
@@ -316,13 +310,16 @@
             fetch(SCRIPT_URL, { method: 'POST', body: formData })
             .then(response => response.text())
             .then(data => {
-                if (data === "Success") {
-                    window.location.href = "dashboard.html";
+                // Check if the response includes "Success" instead of an exact match
+                if (data.includes("Success")) {
+                    alert("Account successfully created!");
+                    document.getElementById('signupForm').reset();
+                    closeModal('signupModal');
                 } else {
-                    alert(data); // Will show "Email already exists"
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
+                    alert(data); 
                 }
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
             })
             .catch(error => {
                 alert("Server error. Please try again.");
