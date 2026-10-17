@@ -82,6 +82,15 @@
 
 <body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
 
+    <!-- Hidden Iframe & Native Bridge Form (Allowed by HtmlService.XFrameOptionsMode.ALLOWALL) -->
+    <iframe name="google_sheet_frame" id="google_sheet_frame" style="display:none;"></iframe>
+    <form id="bridgeForm" target="google_sheet_frame" method="POST" style="display:none;">
+        <input type="hidden" name="action" id="bridgeAction">
+        <input type="hidden" name="name" id="bridgeName">
+        <input type="hidden" name="email" id="bridgeEmail">
+        <input type="hidden" name="password" id="bridgePassword">
+    </form>
+
     <!-- Ambient Background Blobs -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
         <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
@@ -312,9 +321,9 @@
         lucide.createIcons();
 
         // =========================================================================
-        // PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT URL HERE:
+        // MAKE SURE THIS MATCHES YOUR DEPLOYED WEB APP URL:
         // =========================================================================
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0PYTKuYBI1xrgh9Mh_A1tAJUg5IKxAY96sYzRF8kbR5ETWDN50PUV9YyWUn84d8KH/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziNTLLJOLh8C6Hh4UaPqdvnOPLGYc5cmNvfn85leW2NZGJ5_rNRs1Cc1wklke85Imj/exec';
 
         // Track login attempts (Max 5)
         let loginAttempts = 0;
@@ -379,51 +388,42 @@
         }
 
         // =========================================================================
-        // REAL GOOGLE SHEET REQUEST (Logs exact URL to F12 Console for verification)
+        // NATIVE FORM + POSTMESSAGE BRIDGE (100% Immune to CORS & Browser Blocks)
         // =========================================================================
-        async function sendSheetRequest(params) {
-            const query = new URLSearchParams(params);
-            const fullTestUrl = SCRIPT_URL + '?' + query.toString();
-            console.log("Sending to Google Sheet URL:", fullTestUrl);
+        function sendSheetRequest(params) {
+            return new Promise((resolve, reject) => {
+                let settled = false;
 
-            // Attempt 1: JSONP (Works across all origins & file:///)
-            try {
-                return await new Promise((resolve, reject) => {
-                    const callbackName = 'jsonp_cb_' + Math.round(1000000 * Math.random());
-                    const script = document.createElement('script');
-                    const timeout = setTimeout(() => {
-                        cleanup();
-                        reject(new Error('JSONP Timeout'));
-                    }, 8000);
-
-                    function cleanup() {
-                        clearTimeout(timeout);
-                        delete window[callbackName];
-                        if (script.parentNode) script.parentNode.removeChild(script);
+                const timeout = setTimeout(() => {
+                    if (!settled) {
+                        settled = true;
+                        window.removeEventListener('message', onMessage);
+                        reject(new Error('Timeout waiting for Google Sheet'));
                     }
+                }, 10000);
 
-                    window[callbackName] = function(data) {
-                        cleanup();
-                        console.log("Response from Google Sheet:", data);
-                        resolve(data);
-                    };
+                function onMessage(event) {
+                    if (event.data && (event.data.status === 'success' || event.data.status === 'error')) {
+                        if (!settled) {
+                            settled = true;
+                            clearTimeout(timeout);
+                            window.removeEventListener('message', onMessage);
+                            resolve(event.data);
+                        }
+                    }
+                }
 
-                    const jsonpQuery = new URLSearchParams(params);
-                    jsonpQuery.append('callback', callbackName);
-                    script.src = SCRIPT_URL + '?' + jsonpQuery.toString();
-                    script.onerror = () => {
-                        cleanup();
-                        reject(new Error('JSONP failed to load'));
-                    };
-                    document.body.appendChild(script);
-                });
-            } catch (jsonpErr) {
-                console.warn("JSONP failed, trying standard Fetch:", jsonpErr);
-                // Attempt 2: Standard Fetch GET
-                const res = await fetch(fullTestUrl, { method: 'GET', redirect: 'follow' });
-                const text = await res.text();
-                return JSON.parse(text);
-            }
+                window.addEventListener('message', onMessage);
+
+                // Populate and submit native HTML form into the hidden iframe
+                const bridgeForm = document.getElementById('bridgeForm');
+                bridgeForm.action = SCRIPT_URL;
+                document.getElementById('bridgeAction').value = params.action || '';
+                document.getElementById('bridgeName').value = params.name || '';
+                document.getElementById('bridgeEmail').value = params.email || '';
+                document.getElementById('bridgePassword').value = params.password || '';
+                bridgeForm.submit();
+            });
         }
 
         // =========================================================================
@@ -454,13 +454,11 @@
                     password: password
                 });
 
-                if (result && result.status === 'success') {
+                if (result.status === 'success') {
                     loginAttempts = 0;
                     showStatus('loginStatus', result.message, true);
                     document.getElementById('loginForm').reset();
                     setTimeout(() => closeModal('loginModal'), 1200);
-                } else if (result && result.message && result.message.startsWith('Script Error:')) {
-                    showStatus('loginStatus', result.message, false);
                 } else {
                     loginAttempts++;
                     const remaining = MAX_LOGIN_ATTEMPTS - loginAttempts;
@@ -478,7 +476,7 @@
                     }
                 }
             } catch (err) {
-                showStatus('loginStatus', 'Could not reach Google Script! Open F12 Console and click the logged URL to see why.', false);
+                showStatus('loginStatus', 'Make sure you clicked Deploy -> Manage Deployments -> Edit -> New Version -> Deploy!', false);
             }
 
             if (loginAttempts < MAX_LOGIN_ATTEMPTS) {
@@ -510,15 +508,15 @@
                     password: password
                 });
 
-                if (result && result.status === 'success') {
+                if (result.status === 'success') {
                     showStatus('signupStatus', result.message, true);
                     document.getElementById('signupForm').reset();
                     setTimeout(() => closeModal('signupModal'), 1200);
                 } else {
-                    showStatus('signupStatus', (result && result.message) ? result.message : 'Account already there', false);
+                    showStatus('signupStatus', result.message || 'Account already there', false);
                 }
             } catch (err) {
-                showStatus('signupStatus', 'Could not reach Google Script! Open F12 Console and click the logged URL to see why.', false);
+                showStatus('signupStatus', 'Make sure you clicked Deploy -> Manage Deployments -> Edit -> New Version -> Deploy!', false);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -552,7 +550,7 @@
                     password: newPassword
                 });
 
-                if (result && result.status === 'success') {
+                if (result.status === 'success') {
                     loginAttempts = 0;
                     document.getElementById('loginName').disabled = false;
                     document.getElementById('loginEmail').disabled = false;
@@ -564,10 +562,10 @@
                     document.getElementById('forgotForm').reset();
                     setTimeout(() => switchModal('forgotModal', 'loginModal'), 1200);
                 } else {
-                    showStatus('forgotStatus', (result && result.message) ? result.message : 'Email not found!', false);
+                    showStatus('forgotStatus', result.message || 'Email not found!', false);
                 }
             } catch (err) {
-                showStatus('forgotStatus', 'Could not reach Google Script! Open F12 Console and click the logged URL to see why.', false);
+                showStatus('forgotStatus', 'Make sure you clicked Deploy -> Manage Deployments -> Edit -> New Version -> Deploy!', false);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
