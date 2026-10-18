@@ -1,17 +1,7 @@
-/*
- * inverted_index.c  --  Member 2: in-memory inverted index (pure C11)
- *
- * See inverted_index.h for the invariants, optimisations and ownership rules.
- */
 #include "inverted_index.h"
-
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* ------------------------------------------------------------------------- */
-/* Allocation layer (instrumented only in test builds)                        */
-/* ------------------------------------------------------------------------- */
 #ifdef INDEX_TEST_HOOKS
 static long g_fail_after = -1;
 static long g_live       = 0;
@@ -22,7 +12,7 @@ long index_test_live_allocs(void)        { return g_live; }
 static int should_fail(void)
 {
     if (g_fail_after < 0) return 0;
-    if (g_fail_after == 0) return 1;      /* stays 0: keeps failing until reset */
+    if (g_fail_after == 0) return 1;      
     g_fail_after--;
     return 0;
 }
@@ -51,18 +41,12 @@ static void idx_free(void *p)
 #define idx_calloc(n, sz) calloc((n), (sz))
 #define idx_free(p)       free(p)
 #endif
-
-/* ------------------------------------------------------------------------- */
-/* Hashing                                                                    */
-/* ------------------------------------------------------------------------- */
-
-/* djb2 and strlen in one pass over the string. */
 static uint32_t hash_and_len(const char *s, size_t *len_out)
 {
     const unsigned char *p = (const unsigned char *)s;
     uint32_t h = 5381u;
     while (*p) {
-        h = ((h << 5) + h) + *p;          /* h * 33 + c, wraps mod 2^32 */
+        h = ((h << 5) + h) + *p;     
         p++;
     }
     *len_out = (size_t)((const char *)p - s);
@@ -75,10 +59,6 @@ uint32_t djb2_hash(const char *word)
     return word ? hash_and_len(word, &len) : 5381u;
 }
 
-/* ------------------------------------------------------------------------- */
-/* Lifecycle                                                                  */
-/* ------------------------------------------------------------------------- */
-
 Index *create_index(size_t bucket_count)
 {
     Index *index;
@@ -88,9 +68,6 @@ Index *create_index(size_t bucket_count)
 
     index = idx_malloc(sizeof *index);
     if (!index) return NULL;
-
-    /* calloc yields all-bits-zero pointers, i.e. NULL, on every supported
-     * platform (GCC/Clang on x86-64, ARM64 incl. Apple Silicon). */
     index->buckets = idx_calloc(bucket_count, sizeof *index->buckets);
     if (!index->buckets) {
         idx_free(index);
@@ -113,12 +90,12 @@ void free_index(Index *index)
             while (v) {
                 VocabNode *next_v = v->next;
                 PostingNode *p = v->postings;
-                while (p) {                       /* iterative: no recursion */
+                while (p) {                      
                     PostingNode *next_p = p->next;
                     idx_free(p);
                     p = next_p;
                 }
-                idx_free(v);                      /* word is inline: one free */
+                idx_free(v);                      
                 v = next_v;
             }
         }
@@ -126,10 +103,6 @@ void free_index(Index *index)
     idx_free(index->buckets);
     idx_free(index);
 }
-
-/* ------------------------------------------------------------------------- */
-/* Insertion                                                                  */
-/* ------------------------------------------------------------------------- */
 
 static PostingNode *new_posting(int doc_id, int tf)
 {
@@ -140,37 +113,26 @@ static PostingNode *new_posting(int doc_id, int tf)
     n->next           = NULL;
     return n;
 }
-
-/* Saturating add so a pathological count can never overflow int. */
 static void add_tf(PostingNode *n, int tf)
 {
     n->term_frequency = (n->term_frequency > INT_MAX - tf)
                             ? INT_MAX
                             : n->term_frequency + tf;
 }
-
-/* Adds (doc_id, tf) to an existing term. Nothing is modified on failure. */
 static int add_posting_existing(Index *index, VocabNode *v, int doc_id, int tf)
 {
     PostingNode *tail = v->postings_tail;
     PostingNode *node;
-
-    /* Fast path 1: same document as the most recent posting. */
     if (tail->doc_id == doc_id) {
         add_tf(tail, tf);
         return INDEX_OK;
     }
-
-    /* Fast path 2: new, largest doc_id -> O(1) append at the tail. */
     if (tail->doc_id < doc_id) {
         node = new_posting(doc_id, tf);
         if (!node) return INDEX_ERR_NOMEM;
         tail->next      = node;
         v->postings_tail = node;
     } else {
-        /* Slow path: doc_id arrived out of order. Sorted insert keeps I1.
-         * Since doc_id < tail->doc_id the scan always stops at or before
-         * the tail, so the tail pointer stays valid. */
         PostingNode *prev = NULL;
         PostingNode *cur  = v->postings;
         while (cur && cur->doc_id < doc_id) {
@@ -191,8 +153,6 @@ static int add_posting_existing(Index *index, VocabNode *v, int doc_id, int tf)
     index->total_postings++;
     return INDEX_OK;
 }
-
-/* Creates a brand-new term in bucket `*head`. Nothing is modified on failure. */
 static int add_new_term(Index *index, VocabNode **head, uint32_t h,
                         const char *word, size_t len, int doc_id, int tf)
 {
@@ -206,7 +166,7 @@ static int add_new_term(Index *index, VocabNode **head, uint32_t h,
 
     v = idx_malloc(sizeof *v + len + 1);
     if (!v) {
-        idx_free(p);                      /* roll back: no leak on failure */
+        idx_free(p);                   
         return INDEX_ERR_NOMEM;
     }
     memcpy(v->word, word, len + 1);
@@ -214,7 +174,7 @@ static int add_new_term(Index *index, VocabNode **head, uint32_t h,
     v->doc_freq      = 1;
     v->postings      = p;
     v->postings_tail = p;
-    v->next          = *head;             /* insert at chain head: O(1) */
+    v->next          = *head;         
     *head            = v;
 
     index->vocab_size++;
@@ -243,10 +203,6 @@ int index_add_posting(Index *index, const char *word, int doc_id, int tf)
     }
 
     if (!v) return add_new_term(index, head, h, word, len, doc_id, tf);
-
-    /* Move-to-front: hot terms get shorter probes next time. Only relinks
-     * the chain; no node is moved in memory or freed, and it is safe even if
-     * the posting update below fails. */
     if (prev) {
         prev->next = v->next;
         v->next    = *head;
@@ -259,10 +215,6 @@ int add_token(Index *index, const char *word, int doc_id)
 {
     return index_add_posting(index, word, doc_id, 1);
 }
-
-/* ------------------------------------------------------------------------- */
-/* Lookup                                                                     */
-/* ------------------------------------------------------------------------- */
 
 const VocabNode *find_vocab_node(const Index *index, const char *term)
 {
@@ -279,10 +231,6 @@ const VocabNode *find_vocab_node(const Index *index, const char *term)
     }
     return NULL;
 }
-
-/* ------------------------------------------------------------------------- */
-/* Diagnostics                                                                */
-/* ------------------------------------------------------------------------- */
 
 void index_get_stats(const Index *index, IndexStats *out)
 {
