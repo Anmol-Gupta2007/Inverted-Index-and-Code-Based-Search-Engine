@@ -102,10 +102,10 @@
             
             <!-- Auth Buttons -->
             <div class="flex items-center gap-6">
-                <button onclick="openModal('loginModal')" class="font-poppins font-medium text-slate-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-cyan-400 after:transition-all after:duration-300 hover:after:w-full">
+                <button type="button" onclick="openModal('loginModal')" class="font-poppins font-medium text-slate-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-cyan-400 after:transition-all after:duration-300 hover:after:w-full">
                     Log in
                 </button>
-                <button onclick="openModal('signupModal')" class="font-poppins font-medium px-6 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-400/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all duration-300 text-white">
+                <button type="button" onclick="openModal('signupModal')" class="font-poppins font-medium px-6 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-400/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all duration-300 text-white">
                     Sign up
                 </button>
             </div>
@@ -177,7 +177,7 @@
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
         
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="loginCard">
-            <button onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
+            <button type="button" onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
             
@@ -215,7 +215,7 @@
                 </button>
             </form>
             <p class="mt-6 text-center text-sm text-slate-400">
-                New to Code Acer? <button onclick="switchModal('loginModal', 'signupModal')" class="text-white font-medium hover:text-cyan-400 transition-colors ml-1">Create an account</button>
+                New to Code Acer? <button type="button" onclick="openModal('signupModal')" class="text-white font-medium hover:text-cyan-400 transition-colors ml-1">Create an account</button>
             </p>
         </div>
     </div>
@@ -227,7 +227,7 @@
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="signupBackdrop" onclick="closeModal('signupModal')"></div>
         
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="signupCard">
-            <button onclick="closeModal('signupModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
+            <button type="button" onclick="closeModal('signupModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
             
@@ -257,7 +257,7 @@
                 </button>
             </form>
             <p class="mt-8 text-center text-sm text-slate-400">
-                Already have an account? <button onclick="switchModal('signupModal', 'loginModal')" class="text-white font-medium hover:text-purple-400 transition-colors ml-1">Log in</button>
+                Already have an account? <button type="button" onclick="openModal('loginModal')" class="text-white font-medium hover:text-purple-400 transition-colors ml-1">Log in</button>
             </p>
         </div>
     </div>
@@ -269,7 +269,7 @@
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="forgotBackdrop" onclick="closeModal('forgotModal')"></div>
         
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="forgotCard">
-            <button onclick="closeModal('forgotModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
+            <button type="button" onclick="closeModal('forgotModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
             
@@ -302,7 +302,7 @@
                 </button>
             </form>
             <p class="mt-6 text-center text-sm text-slate-400">
-                Remembered your password? <button onclick="switchModal('forgotModal', 'loginModal')" class="text-white font-medium hover:text-cyan-400 transition-colors ml-1">Back to Log in</button>
+                Remembered your password? <button type="button" onclick="openModal('loginModal')" class="text-white font-medium hover:text-cyan-400 transition-colors ml-1">Back to Log in</button>
             </p>
         </div>
     </div>
@@ -312,16 +312,34 @@
         lucide.createIcons();
 
         // =========================================================================
-        // YOUR WORKING GOOGLE APPS SCRIPT URL:
+        // UPDATED TO YOUR NEW GOOGLE APPS SCRIPT URL:
         // =========================================================================
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0PYTKuYBI1xrgh9Mh_A1tAJUg5IKxAY96sYzRF8kbR5ETWDN50PUV9YyWUn84d8KH/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziNTLLJOLh8C6Hh4UaPqdvnOPLGYc5cmNvfn85leW2NZGJ5_rNRs1Cc1wklke85Imj/exec';
 
         // Track login attempts (Max 5)
         let loginAttempts = 0;
         const MAX_LOGIN_ATTEMPTS = 5;
 
-        // Modal Transitions
+        const ALL_MODALS = ['loginModal', 'signupModal', 'forgotModal'];
+
+        // Opens the requested modal and automatically closes any other open modal
         function openModal(modalId) {
+            ALL_MODALS.forEach(id => {
+                if (id !== modalId) {
+                    const m = document.getElementById(id);
+                    const b = document.getElementById(id.replace('Modal', 'Backdrop'));
+                    const c = document.getElementById(id.replace('Modal', 'Card'));
+                    if (m && !m.classList.contains('hidden')) {
+                        b.classList.remove('opacity-100');
+                        b.classList.add('opacity-0');
+                        c.classList.remove('opacity-100', 'scale-100');
+                        c.classList.add('opacity-0', 'scale-95');
+                        m.classList.add('hidden');
+                        m.classList.remove('flex');
+                    }
+                }
+            });
+
             const modal = document.getElementById(modalId);
             const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
             const card = document.getElementById(modalId.replace('Modal', 'Card'));
@@ -353,12 +371,7 @@
             setTimeout(() => {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
-            }, 300);
-        }
-
-        function switchModal(closeId, openId) {
-            closeModal(closeId);
-            setTimeout(() => { openModal(openId); }, 200); 
+            }, 250);
         }
 
         function openForgotModal() {
@@ -366,7 +379,7 @@
             if (currentEmail) {
                 document.getElementById('forgotEmail').value = currentEmail;
             }
-            switchModal('loginModal', 'forgotModal');
+            openModal('forgotModal');
         }
 
         function showStatus(elementId, message, isSuccess) {
@@ -379,51 +392,74 @@
         }
 
         // =========================================================================
-        // CONNECTS TO YOUR LIVE SCRIPT VIA GET / JSONP (Same as opening in a tab!)
+        // CALLS YOUR LIVE CODE.GS WITH 'callback' SO IT USES ContentService
+        // (Skips HtmlService completely & never hangs!)
         // =========================================================================
-        async function callGoogleSheet(params) {
-            const query = new URLSearchParams(params);
+        function callGoogleSheet(params) {
+            return new Promise((resolve, reject) => {
+                let finished = false;
+                const cbName = 'acer_cb_' + Math.floor(Math.random() * 10000000);
+                const script = document.createElement('script');
 
-            // 1. Try simple GET fetch first
-            try {
-                const response = await fetch(`${SCRIPT_URL}?${query.toString()}`, {
-                    method: 'GET',
-                    redirect: 'follow'
-                });
-                const text = await response.text();
-                return JSON.parse(text);
-            } catch (fetchErr) {
-                // 2. Fallback to JSONP <script> tag (Bypasses CORS on file:/// and localhost)
-                return await new Promise((resolve, reject) => {
-                    const cbName = 'jsonp_cb_' + Math.round(1000000 * Math.random());
-                    const script = document.createElement('script');
-
-                    const timer = setTimeout(() => {
+                // Strict 5-second timeout so buttons NEVER get stuck
+                const timer = setTimeout(() => {
+                    if (!finished) {
+                        finished = true;
                         cleanup();
-                        reject(new Error('Timeout'));
-                    }, 8000);
-
-                    function cleanup() {
-                        clearTimeout(timer);
-                        delete window[cbName];
-                        if (script.parentNode) script.parentNode.removeChild(script);
+                        reject(new Error('Request timed out'));
                     }
+                }, 5000);
 
-                    window[cbName] = function(data) {
+                function cleanup() {
+                    clearTimeout(timer);
+                    try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+
+                window[cbName] = function(data) {
+                    if (!finished) {
+                        finished = true;
                         cleanup();
                         resolve(data);
-                    };
+                    }
+                };
 
-                    const jsonpQuery = new URLSearchParams(params);
-                    jsonpQuery.append('callback', cbName);
-                    script.src = `${SCRIPT_URL}?${jsonpQuery.toString()}`;
-                    script.onerror = () => {
-                        cleanup();
-                        reject(new Error('Blocked'));
-                    };
-                    document.body.appendChild(script);
-                });
-            }
+                // Always pass 'callback' so Code.gs line 168 returns ContentService!
+                const query = new URLSearchParams(params);
+                query.append('callback', cbName);
+
+                script.src = `${SCRIPT_URL}?${query.toString()}`;
+                script.onerror = async () => {
+                    if (finished) return;
+                    // Fallback: fetch with callback parameter & 4s AbortController
+                    try {
+                        const controller = new AbortController();
+                        const fetchTimer = setTimeout(() => controller.abort(), 4000);
+                        const res = await fetch(`${SCRIPT_URL}?${query.toString()}`, {
+                            method: 'GET',
+                            credentials: 'omit',
+                            redirect: 'follow',
+                            signal: controller.signal
+                        });
+                        clearTimeout(fetchTimer);
+                        const text = await res.text();
+                        const jsonStr = text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
+                        if (!finished) {
+                            finished = true;
+                            cleanup();
+                            resolve(JSON.parse(jsonStr));
+                        }
+                    } catch (err) {
+                        if (!finished) {
+                            finished = true;
+                            cleanup();
+                            reject(err);
+                        }
+                    }
+                };
+
+                document.body.appendChild(script);
+            });
         }
 
         // =========================================================================
@@ -454,7 +490,7 @@
                     password: password
                 });
 
-                if (result.status === 'success') {
+                if (result && result.status === 'success') {
                     loginAttempts = 0;
                     showStatus('loginStatus', result.message, true);
                     document.getElementById('loginForm').reset();
@@ -476,7 +512,7 @@
                     }
                 }
             } catch (err) {
-                showStatus('loginStatus', 'In Apps Script -> Manage Deployments -> Edit, change "Who has access" to "Anyone"!', false);
+                showStatus('loginStatus', 'Could not connect. Check that Apps Script deployment access is set to "Anyone".', false);
             }
 
             if (loginAttempts < MAX_LOGIN_ATTEMPTS) {
@@ -508,15 +544,15 @@
                     password: password
                 });
 
-                if (result.status === 'success') {
+                if (result && result.status === 'success') {
                     showStatus('signupStatus', result.message, true);
                     document.getElementById('signupForm').reset();
                     setTimeout(() => closeModal('signupModal'), 1200);
                 } else {
-                    showStatus('signupStatus', result.message || 'Account already there', false);
+                    showStatus('signupStatus', (result && result.message) ? result.message : 'Account already there', false);
                 }
             } catch (err) {
-                showStatus('signupStatus', 'In Apps Script -> Manage Deployments -> Edit, change "Who has access" to "Anyone"!', false);
+                showStatus('signupStatus', 'Could not connect. Check that Apps Script deployment access is set to "Anyone".', false);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -550,7 +586,7 @@
                     password: newPassword
                 });
 
-                if (result.status === 'success') {
+                if (result && result.status === 'success') {
                     loginAttempts = 0;
                     document.getElementById('loginName').disabled = false;
                     document.getElementById('loginEmail').disabled = false;
@@ -560,12 +596,12 @@
 
                     showStatus('forgotStatus', result.message, true);
                     document.getElementById('forgotForm').reset();
-                    setTimeout(() => switchModal('forgotModal', 'loginModal'), 1200);
+                    setTimeout(() => openModal('loginModal'), 1200);
                 } else {
-                    showStatus('forgotStatus', result.message || 'Email not found!', false);
+                    showStatus('forgotStatus', (result && result.message) ? result.message : 'Email not found!', false);
                 }
             } catch (err) {
-                showStatus('forgotStatus', 'In Apps Script -> Manage Deployments -> Edit, change "Who has access" to "Anyone"!', false);
+                showStatus('forgotStatus', 'Could not connect. Check that Apps Script deployment access is set to "Anyone".', false);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
