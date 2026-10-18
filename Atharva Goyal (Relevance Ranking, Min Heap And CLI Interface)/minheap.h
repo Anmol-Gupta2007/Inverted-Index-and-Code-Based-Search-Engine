@@ -7,7 +7,7 @@ typedef struct
     double score;
 } Result;
 
-// Heap structure using dynamic memory and pointers (DS Unit 1 & 2)
+
 typedef struct 
 {
     Result* data;
