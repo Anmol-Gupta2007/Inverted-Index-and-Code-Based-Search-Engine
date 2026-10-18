@@ -82,16 +82,6 @@
 
 <body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
 
-    <!-- Hidden Iframe & Native Form for Unblockable Background Sync -->
-    <iframe name="hidden_sheet_iframe" id="hidden_sheet_iframe" style="display:none;"></iframe>
-    <form id="hiddenBridgeForm" target="hidden_sheet_iframe" method="POST" style="display:none;">
-        <input type="hidden" name="action" id="formAction">
-        <input type="hidden" name="name" id="formName">
-        <input type="hidden" name="email" id="formEmail">
-        <input type="hidden" name="password" id="formPassword">
-        <input type="hidden" name="reqId" id="formReqId">
-    </form>
-
     <!-- Ambient Background Blobs -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
         <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
@@ -322,26 +312,13 @@
         lucide.createIcons();
 
         // =========================================================================
-        // YOUR GOOGLE APPS SCRIPT WEB APP URL:
+        // YOUR WORKING GOOGLE APPS SCRIPT URL:
         // =========================================================================
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziNTLLJOLh8C6Hh4UaPqdvnOPLGYc5cmNvfn85leW2NZGJ5_rNRs1Cc1wklke85Imj/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0PYTKuYBI1xrgh9Mh_A1tAJUg5IKxAY96sYzRF8kbR5ETWDN50PUV9YyWUn84d8KH/exec';
 
         // Track login attempts (Max 5)
         let loginAttempts = 0;
         const MAX_LOGIN_ATTEMPTS = 5;
-
-        // Local user store for instant fallback validation
-        function getSavedUsers() {
-            try { return JSON.parse(localStorage.getItem('code_acer_sheet_users') || '{}'); }
-            catch (e) { return {}; }
-        }
-        function setSavedUser(email, name, password, count) {
-            try {
-                const db = getSavedUsers();
-                db[email.toLowerCase()] = { name, password, count: count || 1 };
-                localStorage.setItem('code_acer_sheet_users', JSON.stringify(db));
-            } catch (e) {}
-        }
 
         // Modal Transitions
         function openModal(modalId) {
@@ -402,113 +379,50 @@
         }
 
         // =========================================================================
-        // MULTI-CHANNEL GOOGLE SHEET SYNC (JSONP + Iframe postMessage + no-cors POST)
+        // CONNECTS TO YOUR LIVE SCRIPT VIA GET / JSONP (Same as opening in a tab!)
         // =========================================================================
-        async function syncWithGoogleSheet(params) {
-            const reqId = 'req_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
-            const payload = { ...params, reqId };
-            const urlParams = new URLSearchParams(payload);
+        async function callGoogleSheet(params) {
+            const query = new URLSearchParams(params);
 
-            // Channel 1: Fire unblockable no-cors POST immediately
-            fetch(`${SCRIPT_URL}?${urlParams.toString()}`, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: urlParams.toString()
-            }).catch(() => {});
-
-            // Channel 2 & 3: Race JSONP (<script>) and Native Hidden Form (postMessage)
+            // 1. Try simple GET fetch first
             try {
+                const response = await fetch(`${SCRIPT_URL}?${query.toString()}`, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                const text = await response.text();
+                return JSON.parse(text);
+            } catch (fetchErr) {
+                // 2. Fallback to JSONP <script> tag (Bypasses CORS on file:/// and localhost)
                 return await new Promise((resolve, reject) => {
-                    let settled = false;
-                    const cbName = 'acer_cb_' + Math.round(1000000 * Math.random());
+                    const cbName = 'jsonp_cb_' + Math.round(1000000 * Math.random());
                     const script = document.createElement('script');
 
                     const timer = setTimeout(() => {
-                        if (!settled) {
-                            settled = true;
-                            cleanup();
-                            reject(new Error('Timeout'));
-                        }
-                    }, 2500);
-
-                    function onPostMessage(event) {
-                        if (event.data && (event.data.status === 'success' || event.data.status === 'error')) {
-                            if (!settled) {
-                                settled = true;
-                                cleanup();
-                                resolve(event.data);
-                            }
-                        }
-                    }
+                        cleanup();
+                        reject(new Error('Timeout'));
+                    }, 8000);
 
                     function cleanup() {
                         clearTimeout(timer);
-                        window.removeEventListener('message', onPostMessage);
                         delete window[cbName];
                         if (script.parentNode) script.parentNode.removeChild(script);
                     }
 
-                    window.addEventListener('message', onPostMessage);
-
-                    window[cbName] = function(res) {
-                        if (!settled) {
-                            settled = true;
-                            cleanup();
-                            resolve(res);
-                        }
+                    window[cbName] = function(data) {
+                        cleanup();
+                        resolve(data);
                     };
 
-                    // Submit native form into hidden iframe
-                    try {
-                        const form = document.getElementById('hiddenBridgeForm');
-                        form.action = SCRIPT_URL;
-                        document.getElementById('formAction').value = payload.action || '';
-                        document.getElementById('formName').value = payload.name || '';
-                        document.getElementById('formEmail').value = payload.email || '';
-                        document.getElementById('formPassword').value = payload.password || '';
-                        document.getElementById('formReqId').value = reqId;
-                        form.submit();
-                    } catch (e) {}
-
-                    // Also load via JSONP script tag
-                    const jsonpParams = new URLSearchParams(payload);
-                    jsonpParams.append('callback', cbName);
-                    script.src = `${SCRIPT_URL}?${jsonpParams.toString()}`;
+                    const jsonpQuery = new URLSearchParams(params);
+                    jsonpQuery.append('callback', cbName);
+                    script.src = `${SCRIPT_URL}?${jsonpQuery.toString()}`;
+                    script.onerror = () => {
+                        cleanup();
+                        reject(new Error('Blocked'));
+                    };
                     document.body.appendChild(script);
                 });
-            } catch (err) {
-                // Fallback validation if browser blocks reading cross-origin responses
-                const db = getSavedUsers();
-                const emailKey = (payload.email || '').toLowerCase();
-
-                if (payload.action === 'signup') {
-                    if (db[emailKey]) {
-                        return { status: 'error', message: 'Account already there' };
-                    }
-                    setSavedUser(emailKey, payload.name, payload.password, 1);
-                    return { status: 'success', message: 'Account created and saved to Google Sheets!' };
-                }
-
-                if (payload.action === 'login') {
-                    if (db[emailKey] && db[emailKey].password === payload.password) {
-                        const nextCount = (db[emailKey].count || 1) + 1;
-                        const updatedName = payload.name || db[emailKey].name;
-                        setSavedUser(emailKey, updatedName, payload.password, nextCount);
-                        return {
-                            status: 'success',
-                            message: `Welcome back, ${updatedName}! (Login #${nextCount})`
-                        };
-                    }
-                    return { status: 'error', message: 'you entered wrong password or mail' };
-                }
-
-                if (payload.action === 'reset') {
-                    const existingName = db[emailKey] ? db[emailKey].name : 'User';
-                    const existingCount = db[emailKey] ? db[emailKey].count : 1;
-                    setSavedUser(emailKey, existingName, payload.password, existingCount);
-                    return { status: 'success', message: 'Password updated successfully in Google Sheets!' };
-                }
             }
         }
 
@@ -532,34 +446,37 @@
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            const result = await syncWithGoogleSheet({
-                action: 'login',
-                name: name,
-                email: email,
-                password: password
-            });
+            try {
+                const result = await callGoogleSheet({
+                    action: 'login',
+                    name: name,
+                    email: email,
+                    password: password
+                });
 
-            if (result && result.status === 'success') {
-                loginAttempts = 0;
-                setSavedUser(email, name, password, 1);
-                showStatus('loginStatus', result.message, true);
-                document.getElementById('loginForm').reset();
-                setTimeout(() => closeModal('loginModal'), 1200);
-            } else {
-                loginAttempts++;
-                const remaining = MAX_LOGIN_ATTEMPTS - loginAttempts;
-
-                if (remaining <= 0) {
-                    showStatus('loginStatus', 'you entered wrong password or mail (0 attempts left - Login Locked)', false);
-                    document.getElementById('loginName').disabled = true;
-                    document.getElementById('loginEmail').disabled = true;
-                    document.getElementById('loginPassword').disabled = true;
-                    btn.innerHTML = "Locked (Max 5 Attempts)";
-                    btn.disabled = true;
-                    return;
+                if (result.status === 'success') {
+                    loginAttempts = 0;
+                    showStatus('loginStatus', result.message, true);
+                    document.getElementById('loginForm').reset();
+                    setTimeout(() => closeModal('loginModal'), 1200);
                 } else {
-                    showStatus('loginStatus', `you entered wrong password or mail (Attempt ${loginAttempts}/${MAX_LOGIN_ATTEMPTS})`, false);
+                    loginAttempts++;
+                    const remaining = MAX_LOGIN_ATTEMPTS - loginAttempts;
+
+                    if (remaining <= 0) {
+                        showStatus('loginStatus', 'you entered wrong password or mail (0 attempts left - Login Locked)', false);
+                        document.getElementById('loginName').disabled = true;
+                        document.getElementById('loginEmail').disabled = true;
+                        document.getElementById('loginPassword').disabled = true;
+                        btn.innerHTML = "Locked (Max 5 Attempts)";
+                        btn.disabled = true;
+                        return;
+                    } else {
+                        showStatus('loginStatus', `you entered wrong password or mail (Attempt ${loginAttempts}/${MAX_LOGIN_ATTEMPTS})`, false);
+                    }
                 }
+            } catch (err) {
+                showStatus('loginStatus', 'In Apps Script -> Manage Deployments -> Edit, change "Who has access" to "Anyone"!', false);
             }
 
             if (loginAttempts < MAX_LOGIN_ATTEMPTS) {
@@ -583,24 +500,27 @@
             const email = document.getElementById('signupEmail').value.trim();
             const password = document.getElementById('signupPassword').value;
 
-            const result = await syncWithGoogleSheet({
-                action: 'signup',
-                name: name,
-                email: email,
-                password: password
-            });
+            try {
+                const result = await callGoogleSheet({
+                    action: 'signup',
+                    name: name,
+                    email: email,
+                    password: password
+                });
 
-            if (result && result.status === 'success') {
-                setSavedUser(email, name, password, 1);
-                showStatus('signupStatus', result.message, true);
-                document.getElementById('signupForm').reset();
-                setTimeout(() => closeModal('signupModal'), 1200);
-            } else {
-                showStatus('signupStatus', (result && result.message) ? result.message : 'Account already there', false);
+                if (result.status === 'success') {
+                    showStatus('signupStatus', result.message, true);
+                    document.getElementById('signupForm').reset();
+                    setTimeout(() => closeModal('signupModal'), 1200);
+                } else {
+                    showStatus('signupStatus', result.message || 'Account already there', false);
+                }
+            } catch (err) {
+                showStatus('signupStatus', 'In Apps Script -> Manage Deployments -> Edit, change "Who has access" to "Anyone"!', false);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
         }
 
         // =========================================================================
@@ -623,30 +543,33 @@
             btn.innerHTML = "Updating Password...";
             btn.disabled = true;
 
-            const result = await syncWithGoogleSheet({
-                action: 'reset',
-                email: email,
-                password: newPassword
-            });
+            try {
+                const result = await callGoogleSheet({
+                    action: 'reset',
+                    email: email,
+                    password: newPassword
+                });
 
-            if (result && result.status === 'success') {
-                // Unlock login form if it was locked after 5 failed attempts
-                loginAttempts = 0;
-                document.getElementById('loginName').disabled = false;
-                document.getElementById('loginEmail').disabled = false;
-                document.getElementById('loginPassword').disabled = false;
-                document.getElementById('loginSubmitBtn').disabled = false;
-                document.getElementById('loginSubmitBtn').innerHTML = "Sign in to Continue";
+                if (result.status === 'success') {
+                    loginAttempts = 0;
+                    document.getElementById('loginName').disabled = false;
+                    document.getElementById('loginEmail').disabled = false;
+                    document.getElementById('loginPassword').disabled = false;
+                    document.getElementById('loginSubmitBtn').disabled = false;
+                    document.getElementById('loginSubmitBtn').innerHTML = "Sign in to Continue";
 
-                showStatus('forgotStatus', result.message, true);
-                document.getElementById('forgotForm').reset();
-                setTimeout(() => switchModal('forgotModal', 'loginModal'), 1200);
-            } else {
-                showStatus('forgotStatus', (result && result.message) ? result.message : 'Email not found!', false);
+                    showStatus('forgotStatus', result.message, true);
+                    document.getElementById('forgotForm').reset();
+                    setTimeout(() => switchModal('forgotModal', 'loginModal'), 1200);
+                } else {
+                    showStatus('forgotStatus', result.message || 'Email not found!', false);
+                }
+            } catch (err) {
+                showStatus('forgotStatus', 'In Apps Script -> Manage Deployments -> Edit, change "Who has access" to "Anyone"!', false);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
         }
     </script>
 </body>
