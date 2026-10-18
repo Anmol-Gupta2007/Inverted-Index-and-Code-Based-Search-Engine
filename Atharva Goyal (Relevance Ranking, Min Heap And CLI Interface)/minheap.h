@@ -15,7 +15,6 @@ typedef struct
     int capacity;
 } MinHeap;
 
-// Min-Heap function prototypes (DS Unit 2 & 4)
 MinHeap* createMinHeap(int capacity);
 void insertMinHeap(MinHeap* heap, Result item);
 Result extractMin(MinHeap* heap);
