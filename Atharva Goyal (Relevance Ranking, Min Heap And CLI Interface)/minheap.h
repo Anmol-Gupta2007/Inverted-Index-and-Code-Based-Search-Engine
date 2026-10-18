@@ -1,7 +1,5 @@
 #ifndef MINHEAP_H
 #define MINHEAP_H
-
-// User-defined structure (C++ Unit 1 / DS Unit 1)
 typedef struct 
 {
     int docID;
