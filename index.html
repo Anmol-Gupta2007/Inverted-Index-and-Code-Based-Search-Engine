@@ -82,15 +82,6 @@
 
 <body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
 
-    <!-- Hidden Iframe & Native Bridge Form (Allowed by HtmlService.XFrameOptionsMode.ALLOWALL) -->
-    <iframe name="google_sheet_frame" id="google_sheet_frame" style="display:none;"></iframe>
-    <form id="bridgeForm" target="google_sheet_frame" method="POST" style="display:none;">
-        <input type="hidden" name="action" id="bridgeAction">
-        <input type="hidden" name="name" id="bridgeName">
-        <input type="hidden" name="email" id="bridgeEmail">
-        <input type="hidden" name="password" id="bridgePassword">
-    </form>
-
     <!-- Ambient Background Blobs -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
         <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
@@ -142,7 +133,7 @@
             </p>
         </div>
 
-        <!-- Upload Zone -->
+        <!-- Upload Zone (Locked) -->
         <div class="w-full max-w-3xl mx-auto">
             <div onclick="openModal('loginModal')" class="upload-zone relative flex flex-col items-center justify-center w-full h-72 rounded-3xl cursor-pointer overflow-hidden border-2 border-slate-700/50 border-dashed bg-slate-900/50 backdrop-blur-sm group">
                 
@@ -321,15 +312,15 @@
         lucide.createIcons();
 
         // =========================================================================
-        // MAKE SURE THIS MATCHES YOUR DEPLOYED WEB APP URL:
+        // YOUR GOOGLE APPS SCRIPT WEB APP URL:
         // =========================================================================
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziNTLLJOLh8C6Hh4UaPqdvnOPLGYc5cmNvfn85leW2NZGJ5_rNRs1Cc1wklke85Imj/exec';
 
-        // Track login attempts (Max 5)
+        // Login Attempt Counter (Max 5 Attempts)
         let loginAttempts = 0;
         const MAX_LOGIN_ATTEMPTS = 5;
 
-        // Modal Transitions
+        // Modal Controls
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
@@ -371,9 +362,9 @@
         }
 
         function openForgotModal() {
-            const currentLoginEmail = document.getElementById('loginEmail').value.trim();
-            if (currentLoginEmail) {
-                document.getElementById('forgotEmail').value = currentLoginEmail;
+            const currentEmail = document.getElementById('loginEmail').value.trim();
+            if (currentEmail) {
+                document.getElementById('forgotEmail').value = currentEmail;
             }
             switchModal('loginModal', 'forgotModal');
         }
@@ -388,58 +379,67 @@
         }
 
         // =========================================================================
-        // NATIVE FORM + POSTMESSAGE BRIDGE (100% Immune to CORS & Browser Blocks)
+        // UNIVERSAL GOOGLE SHEETS SENDER (CORS-Safe POST + Multi-Format Parser)
         // =========================================================================
-        function sendSheetRequest(params) {
-            return new Promise((resolve, reject) => {
-                let settled = false;
+        async function sendToGoogleSheet(payloadObj) {
+            const formParams = new URLSearchParams();
+            for (const key in payloadObj) {
+                formParams.append(key, payloadObj[key]);
+            }
 
-                const timeout = setTimeout(() => {
-                    if (!settled) {
-                        settled = true;
-                        window.removeEventListener('message', onMessage);
-                        reject(new Error('Timeout waiting for Google Sheet'));
-                    }
-                }, 10000);
+            // Sending params in both the URL and POST body with credentials: 'omit'
+            // avoids CORS preflight blocks and multi-account Google login redirects
+            const requestUrl = `${SCRIPT_URL}?${formParams.toString()}`;
 
-                function onMessage(event) {
-                    if (event.data && (event.data.status === 'success' || event.data.status === 'error')) {
-                        if (!settled) {
-                            settled = true;
-                            clearTimeout(timeout);
-                            window.removeEventListener('message', onMessage);
-                            resolve(event.data);
-                        }
-                    }
+            const response = await fetch(requestUrl, {
+                method: 'POST',
+                body: formParams,
+                credentials: 'omit',
+                redirect: 'follow'
+            });
+
+            const rawText = await response.text();
+
+            // 1. Parse standard JSON response
+            try {
+                return JSON.parse(rawText);
+            } catch (e) {
+                // 2. If user still has HtmlService postMessage version deployed, extract JSON from it
+                const match = rawText.match(/postMessage\((\{.*?\})\s*,/);
+                if (match && match[1]) {
+                    return JSON.parse(match[1]);
                 }
 
-                window.addEventListener('message', onMessage);
+                // 3. If plain text was returned from an older script version
+                const lower = rawText.toLowerCase();
+                if (lower.includes('already')) {
+                    return { status: 'error', message: 'Account already there' };
+                }
+                if (lower.includes('wrong') || lower.includes('invalid')) {
+                    return { status: 'error', message: 'you entered wrong password or mail' };
+                }
+                if (lower.includes('success')) {
+                    return { status: 'success', message: rawText.trim() };
+                }
 
-                // Populate and submit native HTML form into the hidden iframe
-                const bridgeForm = document.getElementById('bridgeForm');
-                bridgeForm.action = SCRIPT_URL;
-                document.getElementById('bridgeAction').value = params.action || '';
-                document.getElementById('bridgeName').value = params.name || '';
-                document.getElementById('bridgeEmail').value = params.email || '';
-                document.getElementById('bridgePassword').value = params.password || '';
-                bridgeForm.submit();
-            });
+                throw new Error('Unexpected response from Google Script');
+            }
         }
 
         // =========================================================================
-        // 1. LOGIN HANDLER (With 5-Attempt Limit)
+        // 1. LOGIN HANDLER (5 Attempts Max)
         // =========================================================================
         async function handleLogin(event) {
             event.preventDefault();
 
             if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                showStatus('loginStatus', 'Maximum 5 login attempts reached! Please reset your password.', false);
+                showStatus('loginStatus', 'Maximum 5 login attempts reached! Please click Forgot password.', false);
                 return;
             }
 
             const btn = document.getElementById('loginSubmitBtn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = "Verifying...";
+            btn.innerHTML = "Signing in...";
             btn.disabled = true;
 
             const name = document.getElementById('loginName').value.trim();
@@ -447,7 +447,7 @@
             const password = document.getElementById('loginPassword').value;
 
             try {
-                const result = await sendSheetRequest({
+                const result = await sendToGoogleSheet({
                     action: 'login',
                     name: name,
                     email: email,
@@ -475,8 +475,9 @@
                         showStatus('loginStatus', `you entered wrong password or mail (Attempt ${loginAttempts}/${MAX_LOGIN_ATTEMPTS})`, false);
                     }
                 }
-            } catch (err) {
-                showStatus('loginStatus', 'Make sure you clicked Deploy -> Manage Deployments -> Edit -> New Version -> Deploy!', false);
+            } catch (error) {
+                console.error("Login error:", error);
+                showStatus('loginStatus', 'Connection error: Please redeploy your Apps Script as a New Version with access set to Anyone.', false);
             }
 
             if (loginAttempts < MAX_LOGIN_ATTEMPTS) {
@@ -486,14 +487,14 @@
         }
 
         // =========================================================================
-        // 2. SIGNUP HANDLER (Checks for "Account already there")
+        // 2. SIGNUP HANDLER ("Account already there" check)
         // =========================================================================
         async function handleSignup(event) {
             event.preventDefault();
 
             const btn = document.getElementById('signupSubmitBtn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = "Checking & Saving...";
+            btn.innerHTML = "Creating Account...";
             btn.disabled = true;
 
             const name = document.getElementById('signupName').value.trim();
@@ -501,7 +502,7 @@
             const password = document.getElementById('signupPassword').value;
 
             try {
-                const result = await sendSheetRequest({
+                const result = await sendToGoogleSheet({
                     action: 'signup',
                     name: name,
                     email: email,
@@ -515,8 +516,9 @@
                 } else {
                     showStatus('signupStatus', result.message || 'Account already there', false);
                 }
-            } catch (err) {
-                showStatus('signupStatus', 'Make sure you clicked Deploy -> Manage Deployments -> Edit -> New Version -> Deploy!', false);
+            } catch (error) {
+                console.error("Signup error:", error);
+                showStatus('signupStatus', 'Connection error: Please redeploy your Apps Script as a New Version with access set to Anyone.', false);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -524,7 +526,7 @@
         }
 
         // =========================================================================
-        // 3. FORGOT PASSWORD HANDLER (Updates password in Google Sheet)
+        // 3. FORGOT PASSWORD HANDLER
         // =========================================================================
         async function handleResetPassword(event) {
             event.preventDefault();
@@ -544,13 +546,14 @@
             btn.disabled = true;
 
             try {
-                const result = await sendSheetRequest({
+                const result = await sendToGoogleSheet({
                     action: 'reset',
                     email: email,
                     password: newPassword
                 });
 
                 if (result.status === 'success') {
+                    // Unlock login form if it was locked after 5 attempts
                     loginAttempts = 0;
                     document.getElementById('loginName').disabled = false;
                     document.getElementById('loginEmail').disabled = false;
@@ -564,8 +567,9 @@
                 } else {
                     showStatus('forgotStatus', result.message || 'Email not found!', false);
                 }
-            } catch (err) {
-                showStatus('forgotStatus', 'Make sure you clicked Deploy -> Manage Deployments -> Edit -> New Version -> Deploy!', false);
+            } catch (error) {
+                console.error("Reset error:", error);
+                showStatus('forgotStatus', 'Connection error: Please redeploy your Apps Script as a New Version with access set to Anyone.', false);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
