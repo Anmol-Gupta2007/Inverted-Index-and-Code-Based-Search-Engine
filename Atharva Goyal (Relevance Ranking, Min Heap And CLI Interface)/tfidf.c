@@ -6,7 +6,6 @@ double calculateTFIDF(int termFrequency, int documentFrequency, int totalDocumen
     if (termFrequency <= 0 || documentFrequency <= 0 || totalDocuments <= 0 || documentFrequency > totalDocuments) {
         return 0.0;
     }
-    // IDF calculation using natural log
     double idf = log((double)totalDocuments / (double)documentFrequency);
     return (double)termFrequency * idf;
 }
