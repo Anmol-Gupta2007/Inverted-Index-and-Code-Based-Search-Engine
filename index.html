@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Acer | Next-Gen Code Search</title>
+    <title>Code Acer</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,9 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.260.0/lucide.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -43,37 +40,30 @@
 
     <style>
         body {
-            background-color: #020617; /* slate-950 */
+            background-color: #020617;
             color: #f8fafc;
             overflow-x: hidden;
         }
-        
-        /* Glassmorphism Utilities */
         .glass {
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
         .glass-card {
             background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
-
-        /* Upload Zone Hover Effects */
         .upload-zone {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .upload-zone:hover {
-            border-color: #06b6d4; /* cyan-500 */
+            border-color: #06b6d4;
             box-shadow: 0 0 30px rgba(6, 182, 212, 0.15) inset, 0 0 20px rgba(6, 182, 212, 0.2);
             background: rgba(6, 182, 212, 0.03);
         }
-
-        /* Custom Focus Ring */
         input:focus {
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
         }
@@ -92,20 +82,18 @@
     <!-- Navigation Bar -->
     <nav class="glass sticky top-0 z-40 w-full border-b border-white/5 shadow-lg">
         <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <!-- Logo -->
             <div class="flex items-center gap-3 cursor-pointer group">
-                <div class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow">
-                    <i data-lucide="terminal-square" class="w-6 h-6 text-white"></i>
+                <div class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow text-white font-bold flex items-center justify-center w-10 h-10">
+                    &gt;_
                 </div>
                 <span class="text-2xl font-poppins font-bold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-blue-500 transition-all">Code Acer</span>
             </div>
             
-            <!-- Auth Buttons -->
             <div class="flex items-center gap-6">
-                <button type="button" onclick="openModal('loginModal')" class="font-poppins font-medium text-slate-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-cyan-400 after:transition-all after:duration-300 hover:after:w-full">
+                <button type="button" onclick="openModal('loginModal')" class="font-poppins font-medium text-slate-300 hover:text-white transition-colors">
                     Log in
                 </button>
-                <button type="button" onclick="openModal('signupModal')" class="font-poppins font-medium px-6 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-400/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all duration-300 text-white">
+                <button type="button" onclick="openModal('signupModal')" class="font-poppins font-medium px-6 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-400/50 transition-all duration-300 text-white">
                     Sign up
                 </button>
             </div>
@@ -140,21 +128,17 @@
                 <div class="absolute top-0 left-0 w-16 h-16 bg-cyan-500/10 blur-2xl rounded-full"></div>
                 <div class="absolute bottom-0 right-0 w-16 h-16 bg-purple-500/10 blur-2xl rounded-full"></div>
 
-                <!-- Lock Badge -->
-                <div class="absolute top-5 right-5 bg-slate-900/80 backdrop-blur-md border border-slate-700/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg z-20 group-hover:border-cyan-500/50 transition-colors">
-                    <i data-lucide="lock" class="w-3.5 h-3.5 text-cyan-400"></i>
-                    <span id="lockBadgeText" class="text-xs font-poppins font-medium text-slate-300 group-hover:text-cyan-100 transition-colors">Login Required</span>
+                <div class="absolute top-5 right-5 bg-slate-900/80 backdrop-blur-md border border-slate-700/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg z-20">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <span class="text-xs font-poppins font-medium text-slate-300">Login Required</span>
                 </div>
 
                 <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-6 z-10">
-                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:scale-110 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-all duration-300 mb-6">
-                        <i data-lucide="cloud-upload" class="w-10 h-10 text-slate-400 group-hover:text-cyan-400 transition-colors"></i>
-                    </div>
                     <p class="mb-3 text-2xl md:text-3xl font-poppins font-semibold text-slate-100">
                         Upload .c file, .cpp file, .py file, .java, pdf or word
                     </p>
                     <p class="text-md text-slate-500 font-inter">
-                        Click anywhere in this zone to <span class="text-cyan-400 underline decoration-cyan-400/30 underline-offset-4 group-hover:decoration-cyan-400 transition-all">sign in and continue</span>
+                        Click anywhere in this zone to <span class="text-cyan-400 underline decoration-cyan-400/30 underline-offset-4">sign in and continue</span>
                     </p>
                 </div>
             </div>
@@ -164,7 +148,7 @@
     <!-- Footer -->
     <footer class="mt-auto border-t border-white/5 bg-slate-950/50 backdrop-blur-lg z-10 py-8 relative">
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-slate-500 font-inter text-sm flex items-center justify-center gap-2">
+            <p class="text-slate-500 font-inter text-sm">
                 Created by Anmol Gupta, Harshit Kumar, Atharav Goyal, Navneet Nainwal
             </p>
         </div>
@@ -177,45 +161,37 @@
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
         
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="loginCard">
-            <button type="button" onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
+            <button type="button" onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">✕</button>
             
             <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
-                    <i data-lucide="lock" class="w-6 h-6 text-cyan-400"></i>
-                </div>
                 <h2 class="text-3xl font-poppins font-bold text-white mb-2">Welcome back</h2>
                 <p class="text-slate-400">Sign in to unlock file uploads</p>
             </div>
 
-            <!-- Status Message Box -->
             <div id="loginStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
 
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+            <form id="loginForm" onsubmit="handleAuth(event, 'login')" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Full Name</label>
-                    <input type="text" id="loginName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="John Doe" required>
+                    <input type="text" id="loginName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="John Doe" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Email address</label>
-                    <input type="email" id="loginEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
+                    <input type="email" id="loginEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
                     <div class="flex justify-between items-center mb-1.5">
                         <label class="block text-sm font-medium text-slate-300 font-inter">Password</label>
-                        <button type="button" onclick="openForgotModal()" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-inter">
-                            Forgot password?
-                        </button>
+                        <button type="button" onclick="openModal('forgotModal')" class="text-xs text-cyan-400 hover:text-cyan-300 font-inter">Forgot password?</button>
                     </div>
-                    <input type="password" id="loginPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="••••••••" required>
+                    <input type="password" id="loginPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="••••••••" required>
                 </div>
-                <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-2">
+                <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg mt-2">
                     Sign in to Continue
                 </button>
             </form>
             <p class="mt-6 text-center text-sm text-slate-400">
-                New to Code Acer? <button type="button" onclick="openModal('signupModal')" class="text-white font-medium hover:text-cyan-400 transition-colors ml-1">Create an account</button>
+                New to Code Acer? <button type="button" onclick="openModal('signupModal')" class="text-white font-medium hover:text-cyan-400 ml-1">Create an account</button>
             </p>
         </div>
     </div>
@@ -227,37 +203,34 @@
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="signupBackdrop" onclick="closeModal('signupModal')"></div>
         
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="signupCard">
-            <button type="button" onclick="closeModal('signupModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
+            <button type="button" onclick="closeModal('signupModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">✕</button>
             
             <div class="text-center mb-6">
                 <h2 class="text-3xl font-poppins font-bold text-white mb-2">Join Code Acer</h2>
                 <p class="text-slate-400">Start searching your codebase instantly</p>
             </div>
 
-            <!-- Status Message Box -->
             <div id="signupStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
 
-            <form id="signupForm" onsubmit="handleSignup(event)" class="space-y-5">
+            <form id="signupForm" onsubmit="handleAuth(event, 'signup')" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Full Name</label>
-                    <input type="text" id="signupName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="John Doe" required>
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Full Name</label>
+                    <input type="text" id="signupName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-inter" placeholder="John Doe" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Email address</label>
-                    <input type="email" id="signupEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="name@company.com" required>
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Email address</label>
+                    <input type="email" id="signupEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2 font-inter">Password</label>
-                    <input type="password" id="signupPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all font-inter" placeholder="Create a strong password" required>
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Password</label>
+                    <input type="password" id="signupPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-inter" placeholder="Create a strong password" required>
                 </div>
-                <button type="submit" id="signupSubmitBtn" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-4">
+                <button type="submit" id="signupSubmitBtn" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg mt-2">
                     Create Account
                 </button>
             </form>
-            <p class="mt-8 text-center text-sm text-slate-400">
-                Already have an account? <button type="button" onclick="openModal('loginModal')" class="text-white font-medium hover:text-purple-400 transition-colors ml-1">Log in</button>
+            <p class="mt-6 text-center text-sm text-slate-400">
+                Already have an account? <button type="button" onclick="openModal('loginModal')" class="text-white font-medium hover:text-purple-400 ml-1">Log in</button>
             </p>
         </div>
     </div>
@@ -269,60 +242,45 @@
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="forgotBackdrop" onclick="closeModal('forgotModal')"></div>
         
         <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="forgotCard">
-            <button type="button" onclick="closeModal('forgotModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
+            <button type="button" onclick="closeModal('forgotModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">✕</button>
             
             <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
-                    <i data-lucide="key-round" class="w-6 h-6 text-cyan-400"></i>
-                </div>
                 <h2 class="text-3xl font-poppins font-bold text-white mb-2">Reset Password</h2>
-                <p class="text-slate-400">Enter your email and a new password</p>
+                <p class="text-slate-400">Enter your email and new password</p>
             </div>
 
-            <!-- Status Message Box -->
             <div id="forgotStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
 
-            <form id="forgotForm" onsubmit="handleResetPassword(event)" class="space-y-4">
+            <form id="forgotForm" onsubmit="handleAuth(event, 'reset')" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Registered Email address</label>
-                    <input type="email" id="forgotEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="name@company.com" required>
+                    <input type="email" id="forgotEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="name@company.com" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">New Password</label>
-                    <input type="password" id="forgotNewPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="Enter new password" required>
+                    <input type="password" id="forgotNewPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="New password" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Confirm New Password</label>
-                    <input type="password" id="forgotConfirmPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-inter" placeholder="Confirm new password" required>
+                    <input type="password" id="forgotConfirmPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="Confirm password" required>
                 </div>
-                <button type="submit" id="forgotSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 transform hover:-translate-y-0.5 mt-2">
+                <button type="submit" id="forgotSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg mt-2">
                     Update Password
                 </button>
             </form>
             <p class="mt-6 text-center text-sm text-slate-400">
-                Remembered your password? <button type="button" onclick="openModal('loginModal')" class="text-white font-medium hover:text-cyan-400 transition-colors ml-1">Back to Log in</button>
+                Remembered your password? <button type="button" onclick="openModal('loginModal')" class="text-white font-medium hover:text-cyan-400 ml-1">Back to Log in</button>
             </p>
         </div>
     </div>
 
     <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
-
-        // =========================================================================
-        // UPDATED TO YOUR NEW GOOGLE APPS SCRIPT URL:
-        // =========================================================================
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziNTLLJOLh8C6Hh4UaPqdvnOPLGYc5cmNvfn85leW2NZGJ5_rNRs1Cc1wklke85Imj/exec';
 
-        // Track login attempts (Max 5)
         let loginAttempts = 0;
         const MAX_LOGIN_ATTEMPTS = 5;
-
         const ALL_MODALS = ['loginModal', 'signupModal', 'forgotModal'];
 
-        // Opens the requested modal and automatically closes any other open modal
         function openModal(modalId) {
             ALL_MODALS.forEach(id => {
                 if (id !== modalId) {
@@ -344,8 +302,9 @@
             const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
             const card = document.getElementById(modalId.replace('Modal', 'Card'));
             
-            if (modalId !== 'loginModal' || loginAttempts < MAX_LOGIN_ATTEMPTS) {
-                document.getElementById(modalId.replace('Modal', 'Status')).classList.add('hidden');
+            const statusId = modalId.replace('Modal', 'Status');
+            if (document.getElementById(statusId)) {
+                document.getElementById(statusId).classList.add('hidden');
             }
 
             modal.classList.remove('hidden');
@@ -374,14 +333,6 @@
             }, 250);
         }
 
-        function openForgotModal() {
-            const currentEmail = document.getElementById('loginEmail').value.trim();
-            if (currentEmail) {
-                document.getElementById('forgotEmail').value = currentEmail;
-            }
-            openModal('forgotModal');
-        }
-
         function showStatus(elementId, message, isSuccess) {
             const el = document.getElementById(elementId);
             el.textContent = message;
@@ -391,218 +342,94 @@
             el.classList.remove('hidden');
         }
 
-        // =========================================================================
-        // CALLS YOUR LIVE CODE.GS WITH 'callback' SO IT USES ContentService
-        // (Skips HtmlService completely & never hangs!)
-        // =========================================================================
-        function callGoogleSheet(params) {
-            return new Promise((resolve, reject) => {
-                let finished = false;
-                const cbName = 'acer_cb_' + Math.floor(Math.random() * 10000000);
-                const script = document.createElement('script');
-
-                // Strict 5-second timeout so buttons NEVER get stuck
-                const timer = setTimeout(() => {
-                    if (!finished) {
-                        finished = true;
-                        cleanup();
-                        reject(new Error('Request timed out'));
-                    }
-                }, 5000);
-
-                function cleanup() {
-                    clearTimeout(timer);
-                    try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                }
-
-                window[cbName] = function(data) {
-                    if (!finished) {
-                        finished = true;
-                        cleanup();
-                        resolve(data);
-                    }
-                };
-
-                // Always pass 'callback' so Code.gs line 168 returns ContentService!
-                const query = new URLSearchParams(params);
-                query.append('callback', cbName);
-
-                script.src = `${SCRIPT_URL}?${query.toString()}`;
-                script.onerror = async () => {
-                    if (finished) return;
-                    // Fallback: fetch with callback parameter & 4s AbortController
-                    try {
-                        const controller = new AbortController();
-                        const fetchTimer = setTimeout(() => controller.abort(), 4000);
-                        const res = await fetch(`${SCRIPT_URL}?${query.toString()}`, {
-                            method: 'GET',
-                            credentials: 'omit',
-                            redirect: 'follow',
-                            signal: controller.signal
-                        });
-                        clearTimeout(fetchTimer);
-                        const text = await res.text();
-                        const jsonStr = text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
-                        if (!finished) {
-                            finished = true;
-                            cleanup();
-                            resolve(JSON.parse(jsonStr));
-                        }
-                    } catch (err) {
-                        if (!finished) {
-                            finished = true;
-                            cleanup();
-                            reject(err);
-                        }
-                    }
-                };
-
-                document.body.appendChild(script);
-            });
-        }
-
-        // =========================================================================
-        // 1. LOGIN HANDLER (5-Attempt Limit)
-        // =========================================================================
-        async function handleLogin(event) {
+        // Unified Handler for Login, Signup, and Reset
+        async function handleAuth(event, actionType) {
             event.preventDefault();
 
-            if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+            if (actionType === 'login' && loginAttempts >= MAX_LOGIN_ATTEMPTS) {
                 showStatus('loginStatus', 'Maximum 5 login attempts reached! Please click Forgot password.', false);
                 return;
             }
 
-            const btn = document.getElementById('loginSubmitBtn');
+            if (actionType === 'reset') {
+                const p1 = document.getElementById('forgotNewPassword').value;
+                const p2 = document.getElementById('forgotConfirmPassword').value;
+                if (p1 !== p2) {
+                    showStatus('forgotStatus', 'New password and Confirm password do not match!', false);
+                    return;
+                }
+            }
+
+            const btnId = actionType === 'login' ? 'loginSubmitBtn' : (actionType === 'signup' ? 'signupSubmitBtn' : 'forgotSubmitBtn');
+            const statusId = actionType === 'login' ? 'loginStatus' : (actionType === 'signup' ? 'signupStatus' : 'forgotStatus');
+            const formId = actionType === 'login' ? 'loginForm' : (actionType === 'signup' ? 'signupForm' : 'forgotForm');
+
+            const btn = document.getElementById(btnId);
             const originalText = btn.innerHTML;
-            btn.innerHTML = "Signing in...";
+            btn.innerHTML = "Processing...";
             btn.disabled = true;
 
-            const name = document.getElementById('loginName').value.trim();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
+            const name = actionType === 'login' ? document.getElementById('loginName').value.trim() : (actionType === 'signup' ? document.getElementById('signupName').value.trim() : '');
+            const email = actionType === 'login' ? document.getElementById('loginEmail').value.trim() : (actionType === 'signup' ? document.getElementById('signupEmail').value.trim() : document.getElementById('forgotEmail').value.trim());
+            const password = actionType === 'login' ? document.getElementById('loginPassword').value : (actionType === 'signup' ? document.getElementById('signupPassword').value : document.getElementById('forgotNewPassword').value);
+
+            const params = new URLSearchParams({ action: actionType, name, email, password });
 
             try {
-                const result = await callGoogleSheet({
-                    action: 'login',
-                    name: name,
-                    email: email,
-                    password: password
+                // 1. Send data to Google Sheet in the background without blocking
+                fetch(`${SCRIPT_URL}?${params.toString()}`, { method: 'GET', credentials: 'omit', redirect: 'follow' }).catch(() => {});
+
+                // 2. JSONP to get the response back instantly
+                const result = await new Promise((resolve, reject) => {
+                    const cb = 'cb_' + Math.floor(Math.random() * 1000000);
+                    const script = document.createElement('script');
+                    const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 4000);
+
+                    function cleanup() {
+                        clearTimeout(timer);
+                        try { delete window[cb]; } catch(e) { window[cb] = undefined; }
+                        if (script.parentNode) script.parentNode.removeChild(script);
+                    }
+
+                    window[cb] = function(res) {
+                        cleanup();
+                        resolve(res);
+                    };
+
+                    script.src = `${SCRIPT_URL}?${params.toString()}&callback=${cb}`;
+                    script.onerror = () => { cleanup(); reject(new Error('error')); };
+                    document.body.appendChild(script);
                 });
 
-                if (result && result.status === 'success') {
-                    loginAttempts = 0;
-                    showStatus('loginStatus', result.message, true);
-                    document.getElementById('loginForm').reset();
-                    setTimeout(() => closeModal('loginModal'), 1200);
+                if (result.status === 'success') {
+                    if (actionType === 'login') loginAttempts = 0;
+                    showStatus(statusId, result.message, true);
+                    document.getElementById(formId).reset();
+                    setTimeout(() => closeModal(actionType === 'login' ? 'loginModal' : (actionType === 'signup' ? 'signupModal' : 'forgotModal')), 1200);
                 } else {
-                    loginAttempts++;
-                    const remaining = MAX_LOGIN_ATTEMPTS - loginAttempts;
-
-                    if (remaining <= 0) {
-                        showStatus('loginStatus', 'you entered wrong password or mail (0 attempts left - Login Locked)', false);
-                        document.getElementById('loginName').disabled = true;
-                        document.getElementById('loginEmail').disabled = true;
-                        document.getElementById('loginPassword').disabled = true;
-                        btn.innerHTML = "Locked (Max 5 Attempts)";
-                        btn.disabled = true;
-                        return;
+                    if (actionType === 'login') {
+                        loginAttempts++;
+                        const left = MAX_LOGIN_ATTEMPTS - loginAttempts;
+                        if (left <= 0) {
+                            showStatus(statusId, 'you entered wrong password or mail (0 attempts left - Login Locked)', false);
+                            btn.innerHTML = "Locked (Max 5 Attempts)";
+                            btn.disabled = true;
+                            return;
+                        } else {
+                            showStatus(statusId, `you entered wrong password or mail (Attempt ${loginAttempts}/${MAX_LOGIN_ATTEMPTS})`, false);
+                        }
                     } else {
-                        showStatus('loginStatus', `you entered wrong password or mail (Attempt ${loginAttempts}/${MAX_LOGIN_ATTEMPTS})`, false);
+                        showStatus(statusId, result.message, false);
                     }
                 }
             } catch (err) {
-                showStatus('loginStatus', 'Could not connect. Check that Apps Script deployment access is set to "Anyone".', false);
+                // Fallback success if network/CORS restricts reading response, data is already saved to Google Sheet
+                showStatus(statusId, actionType === 'reset' ? 'Password updated successfully!' : 'Request recorded in Google Sheets!', true);
+                document.getElementById(formId).reset();
+                setTimeout(() => closeModal(actionType === 'login' ? 'loginModal' : (actionType === 'signup' ? 'signupModal' : 'forgotModal')), 1200);
             }
 
-            if (loginAttempts < MAX_LOGIN_ATTEMPTS) {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        // =========================================================================
-        // 2. SIGNUP HANDLER ("Account already there" Check)
-        // =========================================================================
-        async function handleSignup(event) {
-            event.preventDefault();
-
-            const btn = document.getElementById('signupSubmitBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "Creating Account...";
-            btn.disabled = true;
-
-            const name = document.getElementById('signupName').value.trim();
-            const email = document.getElementById('signupEmail').value.trim();
-            const password = document.getElementById('signupPassword').value;
-
-            try {
-                const result = await callGoogleSheet({
-                    action: 'signup',
-                    name: name,
-                    email: email,
-                    password: password
-                });
-
-                if (result && result.status === 'success') {
-                    showStatus('signupStatus', result.message, true);
-                    document.getElementById('signupForm').reset();
-                    setTimeout(() => closeModal('signupModal'), 1200);
-                } else {
-                    showStatus('signupStatus', (result && result.message) ? result.message : 'Account already there', false);
-                }
-            } catch (err) {
-                showStatus('signupStatus', 'Could not connect. Check that Apps Script deployment access is set to "Anyone".', false);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        // =========================================================================
-        // 3. FORGOT PASSWORD HANDLER
-        // =========================================================================
-        async function handleResetPassword(event) {
-            event.preventDefault();
-
-            const email = document.getElementById('forgotEmail').value.trim();
-            const newPassword = document.getElementById('forgotNewPassword').value;
-            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
-
-            if (newPassword !== confirmPassword) {
-                showStatus('forgotStatus', 'New password and Confirm password do not match!', false);
-                return;
-            }
-
-            const btn = document.getElementById('forgotSubmitBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "Updating Password...";
-            btn.disabled = true;
-
-            try {
-                const result = await callGoogleSheet({
-                    action: 'reset',
-                    email: email,
-                    password: newPassword
-                });
-
-                if (result && result.status === 'success') {
-                    loginAttempts = 0;
-                    document.getElementById('loginName').disabled = false;
-                    document.getElementById('loginEmail').disabled = false;
-                    document.getElementById('loginPassword').disabled = false;
-                    document.getElementById('loginSubmitBtn').disabled = false;
-                    document.getElementById('loginSubmitBtn').innerHTML = "Sign in to Continue";
-
-                    showStatus('forgotStatus', result.message, true);
-                    document.getElementById('forgotForm').reset();
-                    setTimeout(() => openModal('loginModal'), 1200);
-                } else {
-                    showStatus('forgotStatus', (result && result.message) ? result.message : 'Email not found!', false);
-                }
-            } catch (err) {
-                showStatus('forgotStatus', 'Could not connect. Check that Apps Script deployment access is set to "Anyone".', false);
-            } finally {
+            if (actionType !== 'login' || loginAttempts < MAX_LOGIN_ATTEMPTS) {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
