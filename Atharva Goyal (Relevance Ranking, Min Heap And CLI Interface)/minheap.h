@@ -20,4 +20,4 @@ void insertMinHeap(MinHeap* heap, Result item);
 Result extractMin(MinHeap* heap);
 void freeMinHeap(MinHeap* heap);
 
-#endif // MINHEAP_H
+#endif
