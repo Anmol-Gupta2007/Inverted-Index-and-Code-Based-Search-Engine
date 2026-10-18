@@ -424,7 +424,7 @@
                 }
             } catch (err) {
                 // Fallback success if network/CORS restricts reading response, data is already saved to Google Sheet
-                showStatus(statusId, actionType === 'reset' ? 'Password updated successfully!' : 'Request recorded in Google Sheets!', true);
+                showStatus(statusId, actionType === 'reset' ? 'Password updated successfully!' : 'Request recorded!', true);
                 document.getElementById(formId).reset();
                 setTimeout(() => closeModal(actionType === 'login' ? 'loginModal' : (actionType === 'signup' ? 'signupModal' : 'forgotModal')), 1200);
             }
