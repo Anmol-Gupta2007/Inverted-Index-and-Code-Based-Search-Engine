@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Acer</title>
-    
-    <!-- Tailwind CSS -->
+
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -72,14 +70,14 @@
 
 <body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
 
-    <!-- Ambient Background Blobs -->
+
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
         <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
         <div class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-cyan-900/20 mix-blend-screen filter blur-[100px] animate-blob" style="animation-delay: 2s;"></div>
         <div class="absolute bottom-[-20%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-blue-900/20 mix-blend-screen filter blur-[100px] animate-blob" style="animation-delay: 4s;"></div>
     </div>
 
-    <!-- Navigation Bar -->
+   
     <nav class="glass sticky top-0 z-40 w-full border-b border-white/5 shadow-lg">
         <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
             <div class="flex items-center gap-3 cursor-pointer group">
@@ -100,7 +98,7 @@
         </div>
     </nav>
 
-    <!-- Main Hero & Upload Section -->
+
     <main class="flex-grow flex flex-col items-center justify-center px-4 z-10 relative mt-16 mb-20">
         <div class="text-center max-w-4xl mx-auto mb-16">
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 text-sm font-fira text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
@@ -121,7 +119,7 @@
             </p>
         </div>
 
-        <!-- Upload Zone -->
+    
         <div class="w-full max-w-3xl mx-auto">
             <div onclick="openModal('loginModal')" class="upload-zone relative flex flex-col items-center justify-center w-full h-72 rounded-3xl cursor-pointer overflow-hidden border-2 border-slate-700/50 border-dashed bg-slate-900/50 backdrop-blur-sm group">
                 
@@ -145,18 +143,16 @@
         </div>
     </main>
 
-    <!-- Footer -->
+
     <footer class="mt-auto border-t border-white/5 bg-slate-950/50 backdrop-blur-lg z-10 py-8 relative">
         <div class="max-w-7xl mx-auto px-6 text-center">
             <p class="text-slate-500 font-inter text-sm">
-                Created by Anmol Gupta, Harshit Kumar, Atharav Goyal, Navneet Nainwal
+                Created by Anmol Gupta, Harshit Kumar, Atharav Goyal, Navneet Nainwal   @All rights are reseverd
             </p>
         </div>
     </footer>
 
-    <!-- ========================================== -->
-    <!-- 1. LOGIN MODAL                             -->
-    <!-- ========================================== -->
+   
     <div id="loginModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
         
@@ -196,9 +192,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 2. SIGNUP MODAL                            -->
-    <!-- ========================================== -->
+   
     <div id="signupModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="signupBackdrop" onclick="closeModal('signupModal')"></div>
         
@@ -235,9 +229,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 3. FORGOT PASSWORD MODAL                   -->
-    <!-- ========================================== -->
+ 
     <div id="forgotModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="forgotBackdrop" onclick="closeModal('forgotModal')"></div>
         
@@ -342,7 +334,7 @@
             el.classList.remove('hidden');
         }
 
-        // Unified Handler for Login, Signup, and Reset
+       
         async function handleAuth(event, actionType) {
             event.preventDefault();
 
@@ -376,11 +368,10 @@
             const params = new URLSearchParams({ action: actionType, name, email, password });
 
             try {
-                // 1. Send data to Google Sheet in the background without blocking
+
                 fetch(`${SCRIPT_URL}?${params.toString()}`, { method: 'GET', credentials: 'omit', redirect: 'follow' }).catch(() => {});
 
-                // 2. JSONP to get the response back instantly
-                const result = await new Promise((resolve, reject) => {
+                    const result = await new Promise((resolve, reject) => {
                     const cb = 'cb_' + Math.floor(Math.random() * 1000000);
                     const script = document.createElement('script');
                     const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 4000);
@@ -423,7 +414,6 @@
                     }
                 }
             } catch (err) {
-                // Fallback success if network/CORS restricts reading response, data is already saved to Google Sheet
                 showStatus(statusId, actionType === 'reset' ? 'Password updated successfully!' : 'Request recorded!', true);
                 document.getElementById(formId).reset();
                 setTimeout(() => closeModal(actionType === 'login' ? 'loginModal' : (actionType === 'signup' ? 'signupModal' : 'forgotModal')), 1200);
