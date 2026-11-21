@@ -1,429 +1,1151 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Acer</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeSearch - Inverted Index & Code-Based Search Engine</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        poppins: ['Poppins', 'sans-serif'],
-                        inter: ['Inter', 'sans-serif'],
-                        fira: ['Fira Code', 'monospace'],
-                    },
-                    animation: {
-                        'blob': 'blob 7s infinite',
-                    },
-                    keyframes: {
-                        blob: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
-                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
-                        }
-                    }
-                }
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"Fira Code"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            geu: {
+              blue: '#143769',
+              light: '#eef4fb',
+              accent: '#ffc926'
             }
+          }
         }
-    </script>
+      }
+    }
+  </script>
 
-    <style>
-        body {
-            background-color: #020617;
-            color: #f8fafc;
-            overflow-x: hidden;
-        }
-        .glass {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .glass-card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-        .upload-zone {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .upload-zone:hover {
-            border-color: #06b6d4;
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.15) inset, 0 0 20px rgba(6, 182, 212, 0.2);
-            background: rgba(6, 182, 212, 0.03);
-        }
-        input:focus {
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
-        }
-    </style>
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .highlight-term {
+      background-color: rgba(254, 240, 138, 0.25);
+      color: #fde047;
+      font-weight: 600;
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid rgba(250, 204, 21, 0.4);
+    }
+  </style>
 </head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
 
-<body class="font-inter flex flex-col min-h-screen relative selection:bg-cyan-500 selection:text-white">
-
-
-    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none w-full h-full">
-        <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-purple-900/20 mix-blend-screen filter blur-[100px] animate-blob"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-cyan-900/20 mix-blend-screen filter blur-[100px] animate-blob" style="animation-delay: 2s;"></div>
-        <div class="absolute bottom-[-20%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-blue-900/20 mix-blend-screen filter blur-[100px] animate-blob" style="animation-delay: 4s;"></div>
-    </div>
-
-   
-    <nav class="glass sticky top-0 z-40 w-full border-b border-white/5 shadow-lg">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <div class="flex items-center gap-3 cursor-pointer group">
-                <div class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow text-white font-bold flex items-center justify-center w-10 h-10">
-                    &gt;_
-                </div>
-                <span class="text-2xl font-poppins font-bold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-blue-500 transition-all">Code Acer</span>
-            </div>
-            
-            <div class="flex items-center gap-6">
-                <button type="button" onclick="openModal('loginModal')" class="font-poppins font-medium text-slate-300 hover:text-white transition-colors">
-                    Log in
-                </button>
-                <button type="button" onclick="openModal('signupModal')" class="font-poppins font-medium px-6 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-400/50 transition-all duration-300 text-white">
-                    Sign up
-                </button>
-            </div>
+  <!-- TOP NAVIGATION HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-brand-700 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <i data-lucide="binary" class="w-6 h-6 text-white"></i>
         </div>
-    </nav>
-
-
-    <main class="flex-grow flex flex-col items-center justify-center px-4 z-10 relative mt-16 mb-20">
-        <div class="text-center max-w-4xl mx-auto mb-16">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 text-sm font-fira text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-                </span>
-                Secure Cloud Indexing
-            </div>
-            
-            <h1 class="text-6xl md:text-8xl font-poppins font-extrabold tracking-tighter mb-6">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-sm">
-                    Code Acer
-                </span>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
+              CodeSearch <span class="text-xs font-mono uppercase bg-brand-500/20 text-brand-400 border border-brand-500/30 px-2 py-0.5 rounded">Engine v2.0</span>
             </h1>
-            <p class="text-xl md:text-2xl text-slate-400 font-light max-w-2xl mx-auto leading-relaxed">
-                The blazingly fast inverted index search engine. Find keywords, functions, and classes across your repositories in milliseconds.
-            </p>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">PBL Inverted Index & Boolean Retrieval System (Team DSCPP-III-2026-T112)</p>
         </div>
+      </div>
 
-    
-        <div class="w-full max-w-3xl mx-auto">
-            <div onclick="openModal('loginModal')" class="upload-zone relative flex flex-col items-center justify-center w-full h-72 rounded-3xl cursor-pointer overflow-hidden border-2 border-slate-700/50 border-dashed bg-slate-900/50 backdrop-blur-sm group">
-                
-                <div class="absolute top-0 left-0 w-16 h-16 bg-cyan-500/10 blur-2xl rounded-full"></div>
-                <div class="absolute bottom-0 right-0 w-16 h-16 bg-purple-500/10 blur-2xl rounded-full"></div>
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center space-x-3">
+        <button id="load-sample-btn" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 hover:text-white flex items-center gap-1.5 transition-all shadow-sm">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+          <span>Load C/C++ Sample Repo</span>
+        </button>
+        <button id="clear-all-btn" class="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-medium text-rose-300 flex items-center gap-1 transition-all">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Reset Index</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-                <div class="absolute top-5 right-5 bg-slate-900/80 backdrop-blur-md border border-slate-700/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg z-20">
-                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                    <span class="text-xs font-poppins font-medium text-slate-300">Login Required</span>
-                </div>
+  <!-- MAIN BODY LAYOUT -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
 
-                <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-6 z-10">
-                    <p class="mb-3 text-2xl md:text-3xl font-poppins font-semibold text-slate-100">
-                        Upload .c file, .cpp file, .py file, .java
-                    </p>
-                    <p class="text-md text-slate-500 font-inter">
-                        Click anywhere in this zone to <span class="text-cyan-400 underline decoration-cyan-400/30 underline-offset-4">sign in and continue</span>
-                    </p>
-                </div>
-            </div>
+    <!-- METRICS STRIP -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center space-x-3">
+        <div class="p-2.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <i data-lucide="files" class="w-5 h-5"></i>
         </div>
-    </main>
-
-
-    <footer class="mt-auto border-t border-white/5 bg-slate-950/50 backdrop-blur-lg z-10 py-8 relative">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-slate-500 font-inter text-sm">
-                Created by Anmol Gupta, Harshit Kumar, Atharav Goyal, Navneet Nainwal   @All rights are reseverd
-            </p>
+        <div>
+          <div class="text-xs text-slate-400 font-medium">Indexed Files</div>
+          <div id="stat-docs" class="text-xl font-bold text-slate-100 font-mono">0</div>
         </div>
-    </footer>
+      </div>
 
-   
-    <div id="loginModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
-        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="loginBackdrop" onclick="closeModal('loginModal')"></div>
-        
-        <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="loginCard">
-            <button type="button" onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">✕</button>
-            
-            <div class="text-center mb-6">
-                <h2 class="text-3xl font-poppins font-bold text-white mb-2">Welcome back</h2>
-                <p class="text-slate-400">Sign in to unlock file uploads</p>
-            </div>
-
-            <div id="loginStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
-
-            <form id="loginForm" onsubmit="handleAuth(event, 'login')" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Full Name</label>
-                    <input type="text" id="loginName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="Anmol Gupta" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Email address</label>
-                    <input type="email" id="loginEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="name@company.com" required>
-                </div>
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-sm font-medium text-slate-300 font-inter">Password</label>
-                        <button type="button" onclick="openModal('forgotModal')" class="text-xs text-cyan-400 hover:text-cyan-300 font-inter">Forgot password?</button>
-                    </div>
-                    <input type="password" id="loginPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="••••••••" required>
-                </div>
-                <button type="submit" id="loginSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg mt-2">
-                    Sign in to Continue
-                </button>
-            </form>
-            <p class="mt-6 text-center text-sm text-slate-400">
-                New to Code Acer? <button type="button" onclick="openModal('signupModal')" class="text-white font-medium hover:text-cyan-400 ml-1">Create an account</button>
-            </p>
+      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center space-x-3">
+        <div class="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <i data-lucide="book-open" class="w-5 h-5"></i>
         </div>
+        <div>
+          <div class="text-xs text-slate-400 font-medium">Unique Vocabulary</div>
+          <div id="stat-vocab" class="text-xl font-bold text-slate-100 font-mono">0</div>
+        </div>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center space-x-3">
+        <div class="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+          <i data-lucide="layers" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400 font-medium">Total Postings</div>
+          <div id="stat-postings" class="text-xl font-bold text-slate-100 font-mono">0</div>
+        </div>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center space-x-3">
+        <div class="p-2.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <i data-lucide="timer" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400 font-medium">Index Latency</div>
+          <div id="stat-index-time" class="text-xl font-bold text-slate-100 font-mono">0.00 ms</div>
+        </div>
+      </div>
     </div>
 
-   
-    <div id="signupModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
-        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="signupBackdrop" onclick="closeModal('signupModal')"></div>
-        
-        <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="signupCard">
-            <button type="button" onclick="closeModal('signupModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">✕</button>
-            
-            <div class="text-center mb-6">
-                <h2 class="text-3xl font-poppins font-bold text-white mb-2">Join Code Acer</h2>
-                <p class="text-slate-400">Start searching your codebase instantly</p>
-            </div>
-
-            <div id="signupStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
-
-            <form id="signupForm" onsubmit="handleAuth(event, 'signup')" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Full Name</label>
-                    <input type="text" id="signupName" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-inter" placeholder="Anmol Gupta" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Email address</label>
-                    <input type="email" id="signupEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-inter" placeholder="name@gmail.com" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Password</label>
-                    <input type="password" id="signupPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-inter" placeholder="Create a strong password" required>
-                </div>
-                <button type="submit" id="signupSubmitBtn" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg mt-2">
-                    Create Account
-                </button>
-            </form>
-            <p class="mt-6 text-center text-sm text-slate-400">
-                Already have an account? <button type="button" onclick="openModal('loginModal')" class="text-white font-medium hover:text-purple-400 ml-1">Log in</button>
-            </p>
-        </div>
+    <!-- NAVIGATION TABS -->
+    <div class="border-b border-slate-800 flex space-x-1 sm:space-x-4">
+      <button class="nav-tab active-tab px-4 py-2.5 font-medium text-sm border-b-2 border-brand-500 text-brand-400 flex items-center gap-2" data-tab="tab-search">
+        <i data-lucide="search" class="w-4 h-4"></i> Search & Results
+      </button>
+      <button class="nav-tab px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2" data-tab="tab-files">
+        <i data-lucide="folder-up" class="w-4 h-4"></i> Upload & Repository (<span id="tab-file-count">0</span>)
+      </button>
+      <button class="nav-tab px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2" data-tab="tab-explorer">
+        <i data-lucide="table" class="w-4 h-4"></i> Hash Table Explorer
+      </button>
+      <button class="nav-tab px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2" data-tab="tab-arch">
+        <i data-lucide="cpu" class="w-4 h-4"></i> PBL Architecture Info
+      </button>
     </div>
 
- 
-    <div id="forgotModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center pointer-events-auto">
-        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300 opacity-0" id="forgotBackdrop" onclick="closeModal('forgotModal')"></div>
+    <!-- TAB 1: SEARCH & RESULTS -->
+    <section id="tab-search" class="tab-content flex flex-col gap-6">
+      
+      <!-- Search Input Box -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+        <form id="search-form" class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+              <i data-lucide="terminal" class="w-5 h-5"></i>
+            </div>
+            <input 
+              type="text" 
+              id="search-input"
+              class="w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-mono text-sm transition-all"
+              placeholder="Search code: 'malloc AND pointer', 'struct OR class', 'free', 'memory NOT leak'..."
+              autocomplete="off"
+            />
+          </div>
+          <button 
+            type="submit" 
+            class="px-6 py-3 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-medium text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand-500/25 transition-all">
+            <i data-lucide="search" class="w-4 h-4"></i>
+            <span>Execute Search</span>
+          </button>
+        </form>
+
+        <!-- Quick Query Suggestion Pills -->
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-500 font-medium">Try Sample Queries:</span>
+          <button class="query-pill px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono border border-slate-700/60 transition-colors">malloc AND pointer</button>
+          <button class="query-pill px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono border border-slate-700/60 transition-colors">node AND next</button>
+          <button class="query-pill px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono border border-slate-700/60 transition-colors">free OR leak</button>
+          <button class="query-pill px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono border border-slate-700/60 transition-colors">int NOT char</button>
+          <button class="query-pill px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono border border-slate-700/60 transition-colors">printf</button>
+        </div>
+      </div>
+
+      <!-- Search Stats & Latency Bar -->
+      <div id="search-feedback" class="hidden flex items-center justify-between text-xs text-slate-400 px-1 font-mono">
+        <div id="search-metrics-text">Showing ranked candidates...</div>
+        <div id="search-time" class="text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">0.00 ms</div>
+      </div>
+
+      <!-- Results Container -->
+      <div id="results-container" class="flex flex-col gap-4">
+        <!-- Default Empty State -->
+        <div class="py-16 text-center border-2 border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+          <div class="w-12 h-12 mx-auto rounded-full bg-slate-800/80 flex items-center justify-center text-slate-500 mb-3">
+            <i data-lucide="file-code" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-sm font-semibold text-slate-300">No Search Initiated</h3>
+          <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Upload source files or click "Load C/C++ Sample Repo", then execute single or Boolean queries.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: UPLOAD & REPOSITORY -->
+    <section id="tab-files" class="tab-content hidden flex flex-col gap-6">
+      
+      <!-- Upload Drop Zone -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Multi File Dropzone -->
+        <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-brand-500 bg-slate-900/60 hover:bg-slate-900 rounded-2xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center">
+          <input type="file" id="file-input" multiple class="hidden" accept=".c,.cpp,.h,.hpp,.java,.py,.txt,.js,.html,.css" />
+          <div class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center mb-3">
+            <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+          </div>
+          <p class="text-sm font-semibold text-slate-200">Upload Multiple Source Files</p>
+          <p class="text-xs text-slate-400 mt-1">Drag & drop or click to select (<span class="font-mono">.c, .cpp, .h, .py, .java, .txt</span>)</p>
+          <button type="button" class="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 rounded-lg border border-slate-700">
+            Browse Files
+          </button>
+        </div>
+
+        <!-- Folder Directory Upload -->
+        <div id="folder-drop-zone" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 bg-slate-900/60 hover:bg-slate-900 rounded-2xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center">
+          <input type="file" id="folder-input" webkitdirectory directory multiple class="hidden" />
+          <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-3">
+            <i data-lucide="folder-tree" class="w-6 h-6"></i>
+          </div>
+          <p class="text-sm font-semibold text-slate-200">Upload Whole Code Folder</p>
+          <p class="text-xs text-slate-400 mt-1">Recursively scans codebase directories like Member 1 Directory Walker</p>
+          <button type="button" class="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 rounded-lg border border-slate-700">
+            Select Directory
+          </button>
+        </div>
+      </div>
+
+      <!-- Ingested File List Table -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-bold text-slate-200">Ingested Repository Documents</h2>
+            <p class="text-xs text-slate-400">Tokens extracted after comment stripping and case folding</p>
+          </div>
+          <div class="text-xs font-mono text-slate-400 bg-slate-950 px-3 py-1 rounded-md border border-slate-800">
+            Total files: <span id="files-table-count" class="text-brand-400 font-bold">0</span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
+              <tr>
+                <th class="px-5 py-3">Doc ID</th>
+                <th class="px-5 py-3">File Path / Name</th>
+                <th class="px-5 py-3">Size</th>
+                <th class="px-5 py-3">Tokens Extracted</th>
+                <th class="px-5 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="files-table-body" class="divide-y divide-slate-800 text-slate-300">
+              <tr>
+                <td colspan="5" class="px-5 py-8 text-center text-slate-500 font-sans">No files loaded yet. Click "Load C/C++ Sample Repo" above or drag files here.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: HASH TABLE EXPLORER -->
+    <section id="tab-explorer" class="tab-content hidden flex flex-col gap-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-4">
+          <div>
+            <h2 class="text-sm font-bold text-slate-200">Vocabulary & Inverted Postings Inspector</h2>
+            <p class="text-xs text-slate-400">Inspect the hash table buckets, term frequency, and linked postings lists</p>
+          </div>
+          <div class="w-full sm:w-72">
+            <input 
+              type="text" 
+              id="vocab-filter-input"
+              class="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500"
+              placeholder="Filter vocabulary words..."
+            />
+          </div>
+        </div>
+
+        <!-- Postings Table -->
+        <div class="overflow-x-auto max-h-[520px]">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase sticky top-0">
+              <tr>
+                <th class="px-4 py-2.5">Vocabulary Term</th>
+                <th class="px-4 py-2.5">Doc Frequency (DF)</th>
+                <th class="px-4 py-2.5">Posting List Linked Chain [Doc ID, Term Freq (TF)]</th>
+              </tr>
+            </thead>
+            <tbody id="vocab-table-body" class="divide-y divide-slate-800 text-slate-300">
+              <tr>
+                <td colspan="3" class="px-4 py-8 text-center text-slate-500 font-sans">No index constructed yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ARCHITECTURE & TEAM INFO -->
+    <section id="tab-arch" class="tab-content hidden flex flex-col gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         
-        <div class="glass-card rounded-3xl w-full max-w-md p-8 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="forgotCard">
-            <button type="button" onclick="closeModal('forgotModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors">✕</button>
-            
-            <div class="text-center mb-6">
-                <h2 class="text-3xl font-poppins font-bold text-white mb-2">Reset Password</h2>
-                <p class="text-slate-400">Enter your email and new password</p>
+        <!-- Module 1 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div class="flex items-center space-x-2 text-brand-400 font-bold text-sm mb-2">
+            <span class="w-6 h-6 rounded bg-brand-500/20 flex items-center justify-center text-xs">M1</span>
+            <h3>Source Code Ingestion & Lexer (Anmol Gupta)</h3>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Traverses directories recursively, registers source files with unique monotonic Document IDs, strips single-line comments (<code class="text-amber-300">//</code>), multi-line blocks (<code class="text-amber-300">/* */</code>), and string literals to retain clean programming tokens.
+          </p>
+          <div class="text-[11px] font-mono text-slate-400 bg-slate-950 p-2.5 rounded border border-slate-800">
+            Implemented in C++: <span class="text-slate-200">tokenizer.cpp / tokenizer.h</span>
+          </div>
+        </div>
+
+        <!-- Module 2 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div class="flex items-center space-x-2 text-emerald-400 font-bold text-sm mb-2">
+            <span class="w-6 h-6 rounded bg-emerald-500/20 flex items-center justify-center text-xs">M2</span>
+            <h3>Inverted Index Engine (Navneet Nainwal)</h3>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Implements an in-memory hash table using the <code class="text-amber-300">djb2</code> hashing algorithm with separate chaining. Connects unique tokens to dynamically allocated singly linked postings storing <code class="text-amber-300">{doc_id, tf, next}</code>.
+          </p>
+          <div class="text-[11px] font-mono text-slate-400 bg-slate-950 p-2.5 rounded border border-slate-800">
+            Implemented in C: <span class="text-slate-200">index.c / index.h</span>
+          </div>
+        </div>
+
+        <!-- Module 3 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div class="flex items-center space-x-2 text-indigo-400 font-bold text-sm mb-2">
+            <span class="w-6 h-6 rounded bg-indigo-500/20 flex items-center justify-center text-xs">M3</span>
+            <h3>Boolean Query Engine (Harshit Kumar)</h3>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Processes multi-term queries and executes linear <code class="text-amber-300">O(M+N)</code> two-pointer list intersections (AND), unions (OR), and differences (NOT). Reclaims temporary memory via designated cleanups.
+          </p>
+          <div class="text-[11px] font-mono text-slate-400 bg-slate-950 p-2.5 rounded border border-slate-800">
+            Implemented in C++: <span class="text-slate-200">query_parser.cpp / query_parser.h</span>
+          </div>
+        </div>
+
+        <!-- Module 4 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm mb-2">
+            <span class="w-6 h-6 rounded bg-amber-500/20 flex items-center justify-center text-xs">M4</span>
+            <h3>TF-IDF Ranker & Min-Heap (Atharva Goyal)</h3>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Calculates document relevance scores using Term Frequency (TF) and Inverse Document Frequency (IDF) with logarithmic scaling. Maintains a Min-Heap for Top-K extraction and formats CLI outputs.
+          </p>
+          <div class="text-[11px] font-mono text-slate-400 bg-slate-950 p-2.5 rounded border border-slate-800">
+            Implemented in C++: <span class="text-slate-200">ranker.cpp / minheap.h</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Metadata Card -->
+      <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div class="text-slate-400">
+          <span class="font-bold text-slate-200">Course:</span> Project-Based Learning (CSE) | Graphic Era (Deemed to be University)
+        </div>
+        <div class="text-slate-400">
+          <span class="font-bold text-slate-200">Team ID:</span> DSCPP-III-2026-T112
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FULL CODE VIEWER MODAL -->
+  <div id="code-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+        <div class="flex items-center space-x-3">
+          <i data-lucide="file-text" class="w-5 h-5 text-brand-400"></i>
+          <div>
+            <h3 id="modal-filename" class="text-sm font-bold text-slate-100 font-mono">source_file.c</h3>
+            <span id="modal-meta" class="text-xs text-slate-500 font-mono">Doc ID: #1</span>
+          </div>
+        </div>
+        <button id="modal-close-btn" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Code Body -->
+      <div class="p-4 overflow-y-auto font-mono text-xs text-slate-300 bg-slate-950 flex-1 leading-relaxed whitespace-pre" id="modal-code-content">
+        <!-- Rendered Code with line numbers -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT: INVERTED INDEX ENGINE -->
+  <script>
+    /* ==========================================================================
+       DATA STRUCTURES & STATE (Mirroring C/C++ Inverted Index Architecture)
+       ========================================================================== */
+
+    // Document Registry: Array of { doc_id, filepath, content, tokens: [] }
+    let documents = [];
+    let nextDocId = 1;
+
+    // Hash Table Inverted Index:
+    // Key: term (string) -> Value: Array of { doc_id, tf } sorted by doc_id (Posting List)
+    let invertedIndex = new Map();
+
+    // Sample C/C++ Repositories for instant testing
+    const SAMPLE_FILES = [
+      {
+        filepath: "src/memory_manager.c",
+        content: `/*
+ * Memory Manager & Dynamic Allocation
+ * Author: Systems Team
+ */
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Block {
+    size_t size;
+    int is_free;
+    struct Block* next;
+} Block;
+
+Block* free_list = NULL;
+
+void* my_malloc(size_t size) {
+    if (size == 0) return NULL;
+    Block* curr = free_list;
+    while (curr != NULL) {
+        if (curr->is_free && curr->size >= size) {
+            curr->is_free = 0;
+            return (void*)(curr + 1);
+        }
+        curr = curr->next;
+    }
+    // Allocate new block from heap
+    Block* new_block = (Block*)malloc(sizeof(Block) + size);
+    if (!new_block) return NULL; // prevent memory leak
+    new_block->size = size;
+    new_block->is_free = 0;
+    new_block->next = free_list;
+    free_list = new_block;
+    return (void*)(new_block + 1);
+}
+
+void my_free(void* ptr) {
+    if (!ptr) return;
+    Block* block = ((Block*)ptr) - 1;
+    block->is_free = 1;
+}
+`
+      },
+      {
+        filepath: "src/linked_list.c",
+        content: `// Singly Linked List Data Structure
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    int doc_id;
+    int term_frequency;
+    struct Node* next;
+} Node;
+
+Node* create_node(int doc_id, int tf) {
+    Node* new_node = (Node*)malloc(sizeof(Node));
+    if (!new_node) return NULL;
+    new_node->doc_id = doc_id;
+    new_node->term_frequency = tf;
+    new_node->next = NULL;
+    return new_node;
+}
+
+void print_list(Node* head) {
+    Node* curr = head;
+    while (curr != NULL) {
+        printf("[Doc: %d, TF: %d] -> ", curr->doc_id, curr->term_frequency);
+        curr = curr->next;
+    }
+    printf("NULL\\n");
+}
+`
+      },
+      {
+        filepath: "src/pointer_arithmetic.cpp",
+        content: `// Pointer operations and array traversal
+#include <iostream>
+#include <vector>
+
+void demonstrate_pointers() {
+    int arr[5] = {10, 20, 30, 40, 50};
+    int* ptr = arr;
+
+    std::cout << "First element: " << *ptr << std::endl;
+    ptr++; // Pointer advance
+    std::cout << "Second element: " << *ptr << std::endl;
+
+    // Allocate dynamic array
+    int* dynamic_array = new int[10];
+    for(int i = 0; i < 10; ++i) {
+        *(dynamic_array + i) = i * 2;
+    }
+    delete[] dynamic_array; // Avoid pointer leak
+}
+`
+      },
+      {
+        filepath: "include/hash_table.h",
+        content: `// Hash Table with djb2 Algorithm
+#ifndef HASH_TABLE_H
+#define HASH_TABLE_H
+
+#define TABLE_SIZE 10007
+
+unsigned long hash_djb2(const char* str) {
+    unsigned long hash = 5381;
+    int c;
+    while ((c = *str++)) {
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
+    return hash % TABLE_SIZE;
+}
+
+#endif
+`
+      }
+    ];
+
+    /* ==========================================================================
+       LEXICAL TOKENIZER (Member 1: Ingestion & Comment Stripper)
+       ========================================================================== */
+    function stripCommentsAndStrings(sourceCode) {
+      let clean = '';
+      let inSingleComment = false;
+      let inMultiComment = false;
+      let inString = false;
+
+      for (let i = 0; i < sourceCode.length; i++) {
+        const char = sourceCode[i];
+        const nextChar = i + 1 < sourceCode.length ? sourceCode[i + 1] : '';
+
+        // Inside single-line comment (//)
+        if (inSingleComment) {
+          if (char === '\n') {
+            inSingleComment = false;
+            clean += '\n'; // preserve line numbers
+          }
+          continue;
+        }
+
+        // Inside multi-line comment (/* ... */)
+        if (inMultiComment) {
+          if (char === '*' && nextChar === '/') {
+            inMultiComment = false;
+            i++; // skip /
+          } else if (char === '\n') {
+            clean += '\n';
+          }
+          continue;
+        }
+
+        // Inside string literal ("...")
+        if (inString) {
+          if (char === '\\') {
+            i++; // skip escaped quote
+          } else if (char === '"') {
+            inString = false;
+          }
+          continue;
+        }
+
+        // Start comment checks
+        if (char === '/' && nextChar === '/') {
+          inSingleComment = true;
+          i++;
+          continue;
+        }
+        if (char === '/' && nextChar === '*') {
+          inMultiComment = true;
+          i++;
+          continue;
+        }
+
+        // Start string literal check
+        if (char === '"') {
+          inString = true;
+          continue;
+        }
+
+        clean += char;
+      }
+      return clean;
+    }
+
+    // Extract alphanumeric + underscore tokens normalized to lowercase
+    function tokenizeSource(sourceCode) {
+      const sanitized = stripCommentsAndStrings(sourceCode);
+      const matches = sanitized.match(/[a-zA-Z0-9_]+/g);
+      if (!matches) return [];
+      return matches.map(token => token.toLowerCase());
+    }
+    // -------------------------------------------------------------
+        // PDF Extractor using PDF.js
+        // -------------------------------------------------------------
+    async function extractTextFromPDF(arrayBuffer) {
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => item.str).join(' ');
+            fullText += `--- Page ${pageNum} ---\n` + pageText + '\n\n';
+        }
+        return fullText;
+        }
+    /* ==========================================================================
+       INVERTED INDEX BUILDER (Member 2: Hash Table & Postings)
+       ========================================================================== */
+    function buildInvertedIndex() {
+      const startTime = performance.now();
+      invertedIndex.clear();
+
+      let totalPostingsCount = 0;
+
+      documents.forEach(doc => {
+        // Calculate term frequencies for this document
+        const freqMap = new Map();
+        doc.tokens.forEach(tok => {
+          freqMap.set(tok, (freqMap.get(tok) || 0) + 1);
+        });
+
+        // Insert into Inverted Index
+        freqMap.forEach((tf, token) => {
+          if (!invertedIndex.has(token)) {
+            invertedIndex.set(token, []);
+          }
+          invertedIndex.get(token).push({
+            doc_id: doc.doc_id,
+            term_frequency: tf
+          });
+          totalPostingsCount++;
+        });
+      });
+
+      const endTime = performance.now();
+      const latency = (endTime - startTime).toFixed(2);
+
+      // Update Dashboard Metrics
+      document.getElementById('stat-docs').textContent = documents.length;
+      document.getElementById('stat-vocab').textContent = invertedIndex.size;
+      document.getElementById('stat-postings').textContent = totalPostingsCount;
+      document.getElementById('stat-index-time').textContent = `${latency} ms`;
+      document.getElementById('tab-file-count').textContent = documents.length;
+      document.getElementById('files-table-count').textContent = documents.length;
+
+      renderFilesTable();
+      renderVocabExplorer();
+    }
+
+    /* ==========================================================================
+       BOOLEAN RETRIEVAL ENGINE (Member 3: Two-Pointer Set Operations)
+       ========================================================================== */
+
+    // Linear Two-Pointer Intersection: O(M + N)
+    function intersectAnd(listA, listB) {
+      const result = [];
+      let i = 0, j = 0;
+      while (i < listA.length && j < listB.length) {
+        if (listA[i].doc_id === listB[j].doc_id) {
+          result.push({
+            doc_id: listA[i].doc_id,
+            term_frequency: listA[i].term_frequency + listB[j].term_frequency
+          });
+          i++;
+          j++;
+        } else if (listA[i].doc_id < listB[j].doc_id) {
+          i++;
+        } else {
+          j++;
+        }
+      }
+      return result;
+    }
+
+    // Linear Two-Pointer Union: O(M + N)
+    function unionOr(listA, listB) {
+      const result = [];
+      let i = 0, j = 0;
+      while (i < listA.length && j < listB.length) {
+        if (listA[i].doc_id === listB[j].doc_id) {
+          result.push({
+            doc_id: listA[i].doc_id,
+            term_frequency: listA[i].term_frequency + listB[j].term_frequency
+          });
+          i++;
+          j++;
+        } else if (listA[i].doc_id < listB[j].doc_id) {
+          result.push(listA[i]);
+          i++;
+        } else {
+          result.push(listB[j]);
+          j++;
+        }
+      }
+      while (i < listA.length) result.push(listA[i++]);
+      while (j < listB.length) result.push(listB[j++]);
+      return result;
+    }
+
+    // Linear Two-Pointer Difference: A NOT B: O(M + N)
+    function differenceNot(listA, listB) {
+      const result = [];
+      let i = 0, j = 0;
+      while (i < listA.length && j < listB.length) {
+        if (listA[i].doc_id === listB[j].doc_id) {
+          i++;
+          j++;
+        } else if (listA[i].doc_id < listB[j].doc_id) {
+          result.push(listA[i]);
+          i++;
+        } else {
+          j++;
+        }
+      }
+      while (i < listA.length) result.push(listA[i++]);
+      return result;
+    }
+
+    // Query Evaluator supporting Single Terms and Boolean: AND, OR, NOT
+    function evaluateQuery(queryString) {
+      const rawTokens = queryString.trim().split(/\s+/);
+      if (rawTokens.length === 0 || !rawTokens[0]) return { postings: [], queryTerms: [] };
+
+      // Helper to fetch list from hash table
+      const getPostings = (word) => invertedIndex.get(word.toLowerCase()) || [];
+
+      // Case 1: Compound Boolean Query (e.g., term1 AND term2, term1 OR term2, term1 NOT term2)
+      if (rawTokens.length === 3) {
+        const term1 = rawTokens[0].toLowerCase();
+        const op = rawTokens[1].toUpperCase();
+        const term2 = rawTokens[2].toLowerCase();
+
+        const p1 = getPostings(term1);
+        const p2 = getPostings(term2);
+
+        if (op === 'AND') {
+          return { postings: intersectAnd(p1, p2), queryTerms: [term1, term2] };
+        } else if (op === 'OR') {
+          return { postings: unionOr(p1, p2), queryTerms: [term1, term2] };
+        } else if (op === 'NOT') {
+          return { postings: differenceNot(p1, p2), queryTerms: [term1] };
+        }
+      }
+
+      // Case 2: Multi-term Default (Implicit AND across all terms)
+      let currentPostings = getPostings(rawTokens[0]);
+      const validTerms = [rawTokens[0].toLowerCase()];
+
+      for (let i = 1; i < rawTokens.length; i++) {
+        const nextTerm = rawTokens[i].toLowerCase();
+        if (nextTerm === 'and' || nextTerm === 'or' || nextTerm === 'not') continue;
+        validTerms.push(nextTerm);
+        currentPostings = intersectAnd(currentPostings, getPostings(nextTerm));
+      }
+
+      return { postings: currentPostings, queryTerms: validTerms };
+    }
+
+    /* ==========================================================================
+       TF-IDF RANKER & TOP-K (Member 4: Min-Heap Ranking & CLI Snippets)
+       ========================================================================== */
+    function scoreAndRank(postingsList, totalDocs) {
+      if (!postingsList || postingsList.length === 0 || totalDocs === 0) return [];
+
+      const docFreq = postingsList.length;
+      // Standard smoothed Inverse Document Frequency (IDF)
+      const idf = Math.log(1.0 + (totalDocs / (docFreq > 0 ? docFreq : 1)));
+
+      // Calculate score for each document
+      const scored = postingsList.map(item => {
+        // Log-scaled Term Frequency (TF)
+        const tf = item.term_frequency > 0 ? 1.0 + Math.log(item.term_frequency) : 0;
+        const score = tf * idf;
+        return {
+          doc_id: item.doc_id,
+          term_frequency: item.term_frequency,
+          score: score
+        };
+      });
+
+      // Sort descending (Top-K selection)
+      scored.sort((a, b) => b.score - a.score);
+      return scored;
+    }
+
+    // Extract relevant code snippet lines matching query terms
+    function extractSnippets(sourceCode, queryTerms) {
+      const lines = sourceCode.split('\n');
+      const snippets = [];
+      const termRegex = new RegExp(`\\b(${queryTerms.join('|')})\\b`, 'gi');
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (termRegex.test(line)) {
+          // Highlight term inside line
+          const highlighted = line
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            .replace(termRegex, '<span class="highlight-term">$1</span>');
+          snippets.push({ lineNumber: i + 1, code: highlighted });
+          if (snippets.length >= 3) break; // Limit to top 3 previews
+        }
+      }
+      return snippets;
+    }
+
+    /* ==========================================================================
+       UI RENDERING & INTERACTION HANDLERS
+       ========================================================================== */
+
+    // Tab Switching Logic
+    document.querySelectorAll('.nav-tab').forEach(tabBtn => {
+      tabBtn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => {
+          t.classList.remove('border-brand-500', 'text-brand-400', 'active-tab');
+          t.classList.add('border-transparent', 'text-slate-400');
+        });
+        tabBtn.classList.remove('border-transparent', 'text-slate-400');
+        tabBtn.classList.add('border-brand-500', 'text-brand-400', 'active-tab');
+
+        const targetId = tabBtn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.add('hidden');
+        });
+        document.getElementById(targetId).classList.remove('hidden');
+      });
+    });
+
+    // Ingest Single/Multi Files
+    async function ingestFiles(fileList) {
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        const content = await file.text();
+        const tokens = tokenizeSource(content);
+        documents.push({
+          doc_id: nextDocId++,
+          filepath: file.webkitRelativePath || file.name,
+          size: file.size,
+          content: content,
+          tokens: tokens
+        });
+      }
+      buildInvertedIndex();
+    }
+
+    // Drag and Drop Listeners
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => ingestFiles(e.target.files));
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('border-brand-500', 'bg-slate-900');
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('border-brand-500', 'bg-slate-900');
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-brand-500', 'bg-slate-900');
+      if (e.dataTransfer.files) ingestFiles(e.dataTransfer.files);
+    });
+
+    // Folder Directory Ingestion
+    const folderDropZone = document.getElementById('folder-drop-zone');
+    const folderInput = document.getElementById('folder-input');
+    folderDropZone.addEventListener('click', () => folderInput.click());
+    folderInput.addEventListener('change', (e) => ingestFiles(e.target.files));
+
+    // Load Sample Files Action
+    document.getElementById('load-sample-btn').addEventListener('click', () => {
+      SAMPLE_FILES.forEach(sample => {
+        // Prevent duplicate loads
+        if (!documents.some(d => d.filepath === sample.filepath)) {
+          const tokens = tokenizeSource(sample.content);
+          documents.push({
+            doc_id: nextDocId++,
+            filepath: sample.filepath,
+            size: sample.content.length,
+            content: sample.content,
+            tokens: tokens
+          });
+        }
+      });
+      buildInvertedIndex();
+      // Auto run initial test search
+      document.getElementById('search-input').value = 'malloc AND pointer';
+      executeSearch();
+    });
+
+    // Clear Index
+    document.getElementById('clear-all-btn').addEventListener('click', () => {
+      documents = [];
+      nextDocId = 1;
+      invertedIndex.clear();
+      buildInvertedIndex();
+      document.getElementById('results-container').innerHTML = `
+        <div class="py-16 text-center border-2 border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+          <p class="text-sm font-semibold text-slate-400">Index Reset Completed</p>
+          <p class="text-xs text-slate-500 mt-1">Upload code files to reconstruct the inverted index.</p>
+        </div>
+      `;
+      document.getElementById('search-feedback').classList.add('hidden');
+    });
+
+    // Render Files Table
+    function renderFilesTable() {
+      const tbody = document.getElementById('files-table-body');
+      if (documents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-5 py-8 text-center text-slate-500 font-sans">No files loaded yet. Click "Load C/C++ Sample Repo" above or drag files here.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = documents.map(doc => `
+        <tr class="hover:bg-slate-800/40 transition-colors">
+          <td class="px-5 py-3 font-bold text-brand-400">#${doc.doc_id}</td>
+          <td class="px-5 py-3 text-slate-200">${doc.filepath}</td>
+          <td class="px-5 py-3 text-slate-400">${(doc.size / 1024).toFixed(1)} KB</td>
+          <td class="px-5 py-3 text-slate-300 font-semibold">${doc.tokens.length}</td>
+          <td class="px-5 py-3 text-right">
+            <button onclick="viewFileModal(${doc.doc_id})" class="px-2.5 py-1 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-[11px] mr-1.5 transition-colors">View</button>
+            <button onclick="removeFile(${doc.doc_id})" class="px-2 py-1 text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 rounded border border-rose-500/30 text-[11px] transition-colors"><i data-lucide="trash" class="w-3.5 h-3.5 inline"></i></button>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // Remove single file
+    window.removeFile = function(docId) {
+      documents = documents.filter(d => d.doc_id !== docId);
+      buildInvertedIndex();
+    };
+
+    // Render Hash Table Explorer
+    function renderVocabExplorer(filterTerm = '') {
+      const tbody = document.getElementById('vocab-table-body');
+      if (invertedIndex.size === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-slate-500 font-sans">No index constructed yet.</td></tr>`;
+        return;
+      }
+
+      const rows = [];
+      const filterLower = filterTerm.toLowerCase();
+
+      invertedIndex.forEach((postings, word) => {
+        if (!filterLower || word.includes(filterLower)) {
+          const postingChain = postings.map(p => `
+            <span class="inline-flex items-center gap-1 bg-slate-950 border border-slate-800 text-slate-300 px-2 py-0.5 rounded text-[11px]">
+              <span class="text-brand-400 font-bold">Doc ${p.doc_id}</span>
+              <span class="text-slate-500 font-sans">·</span>
+              <span class="text-amber-400 font-medium">TF:${p.term_frequency}</span>
+            </span>
+          `).join(' <span class="text-slate-600">→</span> ');
+
+          rows.push(`
+            <tr class="hover:bg-slate-800/40">
+              <td class="px-4 py-2 text-brand-300 font-semibold">${word}</td>
+              <td class="px-4 py-2 text-slate-400">${postings.length} doc(s)</td>
+              <td class="px-4 py-2 flex items-center flex-wrap gap-1.5">${postingChain} <span class="text-slate-600 text-[11px]">→ NULL</span></td>
+            </tr>
+          `);
+        }
+      });
+
+      tbody.innerHTML = rows.length > 0 ? rows.slice(0, 100).join('') : `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-500">No matching vocabulary terms found.</td></tr>`;
+    }
+
+    document.getElementById('vocab-filter-input').addEventListener('input', (e) => {
+      renderVocabExplorer(e.target.value);
+    });
+
+    // SEARCH EXECUTION & DISPLAY
+    function executeSearch() {
+      const query = document.getElementById('search-input').value.trim();
+      if (!query) return;
+
+      const start = performance.now();
+      const { postings, queryTerms } = evaluateQuery(query);
+      const ranked = scoreAndRank(postings, documents.length);
+      const end = performance.now();
+      const latency = (end - start).toFixed(2);
+
+      const feedback = document.getElementById('search-feedback');
+      const metricsText = document.getElementById('search-metrics-text');
+      const timeDisplay = document.getElementById('search-time');
+      const container = document.getElementById('results-container');
+
+      feedback.classList.remove('hidden');
+      timeDisplay.textContent = `${latency} ms`;
+      metricsText.textContent = `Found ${ranked.length} candidate document(s) matching '${query}'`;
+
+      if (ranked.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 text-center border border-slate-800 rounded-xl bg-slate-900/60 p-6">
+            <i data-lucide="search-x" class="w-10 h-10 text-slate-500 mx-auto mb-2"></i>
+            <h4 class="text-sm font-semibold text-slate-300">No Matching Documents</h4>
+            <p class="text-xs text-slate-500 mt-1">Try relaxing Boolean constraints or checking vocabulary in the Hash Table Explorer.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      // Render Ranked Result Cards
+      container.innerHTML = ranked.map((res, index) => {
+        const doc = documents.find(d => d.doc_id === res.doc_id);
+        const snippets = extractSnippets(doc.content, queryTerms);
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl p-5 shadow-lg transition-all flex flex-col gap-3">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div class="flex items-center space-x-3">
+                <span class="w-7 h-7 rounded-lg bg-brand-500/10 text-brand-400 font-mono text-xs font-bold flex items-center justify-center border border-brand-500/20">
+                  #${index + 1}
+                </span>
+                <div>
+                  <h4 class="text-sm font-bold text-slate-100 font-mono flex items-center gap-2">
+                    ${doc.filepath}
+                  </h4>
+                  <div class="text-[11px] text-slate-400 font-mono mt-0.5">
+                    Doc ID: <span class="text-slate-200">#${doc.doc_id}</span> | Match TF: <span class="text-slate-200">${res.term_frequency}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-3 self-end sm:self-center">
+                <div class="text-right">
+                  <div class="text-[11px] text-slate-500 font-mono">TF-IDF Score</div>
+                  <div class="text-xs font-mono font-bold text-amber-400">${res.score.toFixed(4)}</div>
+                </div>
+                <button onclick="viewFileModal(${doc.doc_id})" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium border border-slate-700 flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                  <span>Inspect Code</span>
+                </button>
+              </div>
             </div>
 
-            <div id="forgotStatus" class="hidden mb-4 p-3 rounded-xl text-sm font-inter text-center"></div>
-
-            <form id="forgotForm" onsubmit="handleAuth(event, 'reset')" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Registered Email address</label>
-                    <input type="email" id="forgotEmail" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="name@company.com" required>
+            <!-- Snippets Section -->
+            <div class="space-y-1.5">
+              ${snippets.length > 0 ? snippets.map(snip => `
+                <div class="flex items-start text-xs font-mono bg-slate-950 rounded-lg p-2 border border-slate-800/80">
+                  <span class="text-slate-600 select-none pr-3 w-8 text-right border-r border-slate-800/80 mr-3">${snip.lineNumber}</span>
+                  <div class="overflow-x-auto text-slate-300 flex-1">${snip.code}</div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">New Password</label>
-                    <input type="password" id="forgotNewPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="New password" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5 font-inter">Confirm New Password</label>
-                    <input type="password" id="forgotConfirmPassword" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-inter" placeholder="Confirm password" required>
-                </div>
-                <button type="submit" id="forgotSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-poppins font-semibold py-3.5 rounded-xl shadow-lg mt-2">
-                    Update Password
-                </button>
-            </form>
-            <p class="mt-6 text-center text-sm text-slate-400">
-                Remembered your password? <button type="button" onclick="openModal('loginModal')" class="text-white font-medium hover:text-cyan-400 ml-1">Back to Log in</button>
-            </p>
-        </div>
-    </div>
+              `).join('') : `
+                <div class="text-xs text-slate-500 italic">Term occurrences matched across indexed tokens.</div>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
 
-    <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziNTLLJOLh8C6Hh4UaPqdvnOPLGYc5cmNvfn85leW2NZGJ5_rNRs1Cc1wklke85Imj/exec';
+      lucide.createIcons();
+    }
 
-        let loginAttempts = 0;
-        const MAX_LOGIN_ATTEMPTS = 5;
-        const ALL_MODALS = ['loginModal', 'signupModal', 'forgotModal'];
+    document.getElementById('search-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      executeSearch();
+    });
 
-        function openModal(modalId) {
-            ALL_MODALS.forEach(id => {
-                if (id !== modalId) {
-                    const m = document.getElementById(id);
-                    const b = document.getElementById(id.replace('Modal', 'Backdrop'));
-                    const c = document.getElementById(id.replace('Modal', 'Card'));
-                    if (m && !m.classList.contains('hidden')) {
-                        b.classList.remove('opacity-100');
-                        b.classList.add('opacity-0');
-                        c.classList.remove('opacity-100', 'scale-100');
-                        c.classList.add('opacity-0', 'scale-95');
-                        m.classList.add('hidden');
-                        m.classList.remove('flex');
-                    }
-                }
-            });
+    // Query pills handler
+    document.querySelectorAll('.query-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('search-input').value = btn.textContent;
+        // switch to search tab if not active
+        document.querySelector('[data-tab="tab-search"]').click();
+        executeSearch();
+      });
+    });
 
-            const modal = document.getElementById(modalId);
-            const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
-            const card = document.getElementById(modalId.replace('Modal', 'Card'));
-            
-            const statusId = modalId.replace('Modal', 'Status');
-            if (document.getElementById(statusId)) {
-                document.getElementById(statusId).classList.add('hidden');
-            }
+    // FULL SOURCE CODE MODAL VIEWER
+    window.viewFileModal = function(docId) {
+      const doc = documents.find(d => d.doc_id === docId);
+      if (!doc) return;
 
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            void modal.offsetWidth;
-            
-            backdrop.classList.remove('opacity-0');
-            backdrop.classList.add('opacity-100');
-            card.classList.remove('opacity-0', 'scale-95');
-            card.classList.add('opacity-100', 'scale-100');
-        }
+      document.getElementById('modal-filename').textContent = doc.filepath;
+      document.getElementById('modal-meta').textContent = `Doc ID: #${doc.doc_id} · ${doc.tokens.length} tokens · ${(doc.size / 1024).toFixed(1)} KB`;
 
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            const backdrop = document.getElementById(modalId.replace('Modal', 'Backdrop'));
-            const card = document.getElementById(modalId.replace('Modal', 'Card'));
-            
-            backdrop.classList.remove('opacity-100');
-            backdrop.classList.add('opacity-0');
-            card.classList.remove('opacity-100', 'scale-100');
-            card.classList.add('opacity-0', 'scale-95');
-            
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }, 250);
-        }
+      const lines = doc.content.split('\n');
+      const formatted = lines.map((line, idx) => {
+        const lineNo = (idx + 1).toString().padStart(4, ' ');
+        const escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return `<span class="text-slate-600 select-none mr-3">${lineNo} |</span>${escaped}`;
+      }).join('\n');
 
-        function showStatus(elementId, message, isSuccess) {
-            const el = document.getElementById(elementId);
-            el.textContent = message;
-            el.className = isSuccess 
-                ? "mb-4 p-3 rounded-xl text-sm font-inter text-center bg-emerald-500/20 border border-emerald-500/40 text-emerald-300"
-                : "mb-4 p-3 rounded-xl text-sm font-inter text-center bg-rose-500/20 border border-rose-500/40 text-rose-300";
-            el.classList.remove('hidden');
-        }
+      document.getElementById('modal-code-content').innerHTML = formatted;
+      document.getElementById('code-modal').classList.remove('hidden');
+    };
 
-       
-        async function handleAuth(event, actionType) {
-            event.preventDefault();
+    document.getElementById('modal-close-btn').addEventListener('click', () => {
+      document.getElementById('code-modal').classList.add('hidden');
+    });
 
-            if (actionType === 'login' && loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                showStatus('loginStatus', 'Maximum 5 login attempts reached! Please click Forgot password.', false);
-                return;
-            }
+    // Close modal on escape or background click
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.getElementById('code-modal').classList.add('hidden');
+    });
+    document.getElementById('code-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'code-modal') document.getElementById('code-modal').classList.add('hidden');
+    });
 
-            if (actionType === 'reset') {
-                const p1 = document.getElementById('forgotNewPassword').value;
-                const p2 = document.getElementById('forgotConfirmPassword').value;
-                if (p1 !== p2) {
-                    showStatus('forgotStatus', 'New password and Confirm password do not match!', false);
-                    return;
-                }
-            }
-
-            const btnId = actionType === 'login' ? 'loginSubmitBtn' : (actionType === 'signup' ? 'signupSubmitBtn' : 'forgotSubmitBtn');
-            const statusId = actionType === 'login' ? 'loginStatus' : (actionType === 'signup' ? 'signupStatus' : 'forgotStatus');
-            const formId = actionType === 'login' ? 'loginForm' : (actionType === 'signup' ? 'signupForm' : 'forgotForm');
-
-            const btn = document.getElementById(btnId);
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "Processing...";
-            btn.disabled = true;
-
-            const name = actionType === 'login' ? document.getElementById('loginName').value.trim() : (actionType === 'signup' ? document.getElementById('signupName').value.trim() : '');
-            const email = actionType === 'login' ? document.getElementById('loginEmail').value.trim() : (actionType === 'signup' ? document.getElementById('signupEmail').value.trim() : document.getElementById('forgotEmail').value.trim());
-            const password = actionType === 'login' ? document.getElementById('loginPassword').value : (actionType === 'signup' ? document.getElementById('signupPassword').value : document.getElementById('forgotNewPassword').value);
-
-            const params = new URLSearchParams({ action: actionType, name, email, password });
-
-            try {
-
-                fetch(`${SCRIPT_URL}?${params.toString()}`, { method: 'GET', credentials: 'omit', redirect: 'follow' }).catch(() => {});
-
-                    const result = await new Promise((resolve, reject) => {
-                    const cb = 'cb_' + Math.floor(Math.random() * 1000000);
-                    const script = document.createElement('script');
-                    const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 4000);
-
-                    function cleanup() {
-                        clearTimeout(timer);
-                        try { delete window[cb]; } catch(e) { window[cb] = undefined; }
-                        if (script.parentNode) script.parentNode.removeChild(script);
-                    }
-
-                    window[cb] = function(res) {
-                        cleanup();
-                        resolve(res);
-                    };
-
-                    script.src = `${SCRIPT_URL}?${params.toString()}&callback=${cb}`;
-                    script.onerror = () => { cleanup(); reject(new Error('error')); };
-                    document.body.appendChild(script);
-                });
-
-                if (result.status === 'success') {
-                    if (actionType === 'login') loginAttempts = 0;
-                    showStatus(statusId, result.message, true);
-                    document.getElementById(formId).reset();
-                    setTimeout(() => closeModal(actionType === 'login' ? 'loginModal' : (actionType === 'signup' ? 'signupModal' : 'forgotModal')), 1200);
-                } else {
-                    if (actionType === 'login') {
-                        loginAttempts++;
-                        const left = MAX_LOGIN_ATTEMPTS - loginAttempts;
-                        if (left <= 0) {
-                            showStatus(statusId, 'you entered wrong password or mail (0 attempts left - Login Locked)', false);
-                            btn.innerHTML = "Locked (Max 5 Attempts)";
-                            btn.disabled = true;
-                            return;
-                        } else {
-                            showStatus(statusId, `you entered wrong password or mail (Attempt ${loginAttempts}/${MAX_LOGIN_ATTEMPTS})`, false);
-                        }
-                    } else {
-                        showStatus(statusId, result.message, false);
-                    }
-                }
-            } catch (err) {
-                showStatus(statusId, actionType === 'reset' ? 'Password updated successfully!' : 'Request recorded!', true);
-                document.getElementById(formId).reset();
-                setTimeout(() => closeModal(actionType === 'login' ? 'loginModal' : (actionType === 'signup' ? 'signupModal' : 'forgotModal')), 1200);
-            }
-
-            if (actionType !== 'login' || loginAttempts < MAX_LOGIN_ATTEMPTS) {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-    </script>
+    // Initial icon render
+    window.onload = function() {
+      lucide.createIcons();
+    };
+  </script>
 </body>
 </html>
