@@ -6,13 +6,12 @@
 #include <cctype>
 #include <cstdlib>
 #include <filesystem>
-
 extern "C" {
-    #include "index.h"          
+    #include "index.h"           
 }
 #include "tokenizer.h"          
-#include "query_parser.h"        
-#include "ranker.h"              
+#include "query_parser.h"       
+#include "ranker.h"             
 
 using namespace std;
 using namespace std::chrono;
@@ -20,6 +19,7 @@ namespace fs = std::filesystem;
 
 static unordered_map<int, string> doc_id_to_path;
 static InvertedIndex *global_index = nullptr;
+
 
 string to_lower_str(string s) {
     for (auto &c : s) c = static_cast<char>(tolower(static_cast<unsigned char>(c)));
@@ -31,12 +31,16 @@ string to_upper_str(string s) {
     return s;
 }
 
+
 void open_file_in_editor(const string &filepath) {
     string abs_path = fs::absolute(filepath).string();
     cout << "[Opening] " << abs_path << " ...\n";
+
+   
     string vscode_cmd = "code \"" + abs_path + "\" 2>nul";
     int status = system(vscode_cmd.c_str());
 
+   
     if (status != 0) {
         #ifdef _WIN32
             string win_cmd = "start \"\" \"" + abs_path + "\"";
@@ -50,7 +54,6 @@ void open_file_in_editor(const string &filepath) {
 
 void print_clickable_link(const string &filepath) {
     string abs_path = fs::absolute(filepath).string();
-    // Forward slashes for file:// URI
     string uri_path = abs_path;
     for (char &c : uri_path) {
         if (c == '\\') c = '/';
@@ -108,30 +111,39 @@ void execute_search(const string &raw_query) {
         string term = to_lower_str(query_tokens[0]);
         final_postings = get_postings(global_index, term.c_str());
     } 
-    else if (query_tokens.size() >= 3) {
-        string term1 = to_lower_str(query_tokens[0]);
-        string op    = to_upper_str(query_tokens[1]);
-        string term2 = to_lower_str(query_tokens[2]);
+    else if (query_tokens.size() >= 3 && query_tokens.size() % 2 == 1) {
+        string first_term = to_lower_str(query_tokens[0]);
+        final_postings = get_postings(global_index, first_term.c_str());
 
-        PostingNode *p1 = get_postings(global_index, term1.c_str());
-        PostingNode *p2 = get_postings(global_index, term2.c_str());
+        for (size_t i = 1; i + 1 < query_tokens.size(); i += 2) {
+            string op = to_upper_str(query_tokens[i]);
+            string next_term = to_lower_str(query_tokens[i + 1]);
+            PostingNode *p_next = get_postings(global_index, next_term.c_str());
 
-        if (op == "AND") {
-            final_postings = intersect_and(p1, p2);
+            PostingNode *next_res = nullptr;
+            if (op == "AND") {
+                next_res = intersect_and(final_postings, p_next);
+            } else if (op == "OR") {
+                next_res = union_or(final_postings, p_next);
+            } else if (op == "NOT") {
+                next_res = difference_not(final_postings, p_next);
+            } else {
+                cout << "[Error] Unknown operator: " << op << " (Use AND, OR, or NOT)\n";
+                if (is_allocated_result && final_postings) {
+                    free_result_postings(final_postings);
+                }
+                return;
+            }
+
+            if (is_allocated_result && final_postings) {
+                free_result_postings(final_postings);
+            }
+            final_postings = next_res;
             is_allocated_result = true;
-        } else if (op == "OR") {
-            final_postings = union_or(p1, p2);
-            is_allocated_result = true;
-        } else if (op == "NOT") {
-            final_postings = difference_not(p1, p2);
-            is_allocated_result = true;
-        } else {
-            cout << "[Error] Unknown operator: " << op << " (Use AND, OR, or NOT)\n";
-            return;
         }
     } 
     else {
-        cout << "[Error] Invalid query. Format: <word> OR <word1 AND|OR|NOT word2>\n";
+        cout << "[Error] Invalid query. Format: <word> OR <word1 AND|OR|NOT word2 ...>\n";
         return;
     }
 
@@ -149,12 +161,11 @@ void execute_search(const string &raw_query) {
     }
 
     vector<SearchResult> scored_results = compute_tfidf_scores(final_postings, match_count, total_corpus_docs);
-    int K = 5;
+    int K = match_count; // Returns all matching files (e.g., all 8) instead of capping at 5
     vector<SearchResult> top_k = get_top_k_results(scored_results, K);
 
     auto end = high_resolution_clock::now();
     double latency_ms = duration<double, milli>(end - start).count();
-
     cout << "\n====================================================================\n";
     cout << "Query: \"" << raw_query << "\" | Matches: " << match_count 
          << " | Latency: " << latency_ms << " ms\n";
@@ -173,8 +184,8 @@ void execute_search(const string &raw_query) {
     cout << "====================================================================\n";
 
     while (!ranked_paths.empty()) {
-        cout << "File kholne ke liye number (1-" << ranked_paths.size() 
-             << ") dabayein (ya next search ke liye '0' / Enter): ";
+        cout << "To open file select(1-" << ranked_paths.size() 
+             << ") (for next search select '0' / Enter): ";
         string choice;
         getline(cin, choice);
 
@@ -207,7 +218,7 @@ int main(int argc, char *argv[]) {
     if (argc > 1) {
         target_dir = argv[1];
     } else {
-        cout << "Enter directory path to scan (e.g., C:\\MyProject ya ./src): ";
+        cout << "Enter directory path to scan (e.g., C:\\MyProject): ";
         getline(cin, target_dir);
         if (target_dir.empty()) target_dir = "./src";
     }
@@ -216,7 +227,7 @@ int main(int argc, char *argv[]) {
 
     string query;
     while (true) {
-        cout << "Search Query (ya 'exit'): ";
+        cout << "Search Query (or 'exit'): ";
         if (!getline(cin, query)) break;
 
         if (query.empty()) continue;
