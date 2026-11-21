@@ -1,71 +1,35 @@
-#ifndef INVERTED_INDEX_H
-#define INVERTED_INDEX_H
-
+#ifndef INDEX_H
+#define INDEX_H
 #include <stddef.h>
-#include <stdint.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifndef TABLE_SIZE
-#define TABLE_SIZE 4093
-#endif
-
+#define TABLE_SIZE 10007 
 typedef struct PostingNode {
     int doc_id;
     int term_frequency;
     struct PostingNode *next;
 } PostingNode;
+typedef struct HashEntry {
+    char *word;
+    PostingNode *head;
+    struct HashEntry *next; 
+} HashEntry;
 
-typedef struct VocabNode {
-    struct VocabNode *next;
-    PostingNode *postings;
-    PostingNode *postings_tail;
-    uint32_t hash;
-    int doc_freq;
-    char word[];
-} VocabNode;
+typedef struct InvertedIndex {
+    HashEntry *buckets[TABLE_SIZE];
+    int total_documents;
+} InvertedIndex;
 
-typedef struct Index {
-    VocabNode **buckets;
-    size_t bucket_count;
-    size_t vocab_size;
-    size_t total_postings;
-} Index;
+InvertedIndex* create_inverted_index(void);
+void free_inverted_index(InvertedIndex *index);
 
-enum {
-    INDEX_OK          =  0,
-    INDEX_ERR_INVALID = -1,
-    INDEX_ERR_NOMEM   = -2
-};
+void insert_token(InvertedIndex *index, const char *token, int doc_id);
+PostingNode* get_postings(InvertedIndex *index, const char *token);
 
-Index *create_index(size_t bucket_count);
-void free_index(Index *index);
-
-int add_token(Index *index, const char *word, int doc_id);
-int index_add_posting(Index *index, const char *word, int doc_id, int tf);
-
-const VocabNode *find_vocab_node(const Index *index, const char *term);
-
-uint32_t djb2_hash(const char *word);
-
-typedef struct IndexStats {
-    size_t bucket_count;
-    size_t used_buckets;
-    size_t longest_chain;
-    size_t vocab_size;
-    size_t total_postings;
-    double load_factor;
-} IndexStats;
-
-void index_get_stats(const Index *index, IndexStats *out);
-
-#define index_create(n)   create_index(n)
-#define index_destroy(ix) free_index(ix)
+void print_index_stats(const InvertedIndex *index);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif
