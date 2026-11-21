@@ -3,9 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// ----------------------------------------------------------------------
-// djb2 Hashing Algorithm by Dan Bernstein
-// ----------------------------------------------------------------------
 static unsigned long hash_djb2(const char *str) {
     unsigned long hash = 5381;
     int c;
@@ -15,9 +12,6 @@ static unsigned long hash_djb2(const char *str) {
     return hash % TABLE_SIZE;
 }
 
-// ----------------------------------------------------------------------
-// Helper: Create a new Posting Node
-// ----------------------------------------------------------------------
 static PostingNode* create_posting_node(int doc_id) {
     PostingNode *node = (PostingNode *)malloc(sizeof(PostingNode));
     if (!node) {
@@ -30,9 +24,6 @@ static PostingNode* create_posting_node(int doc_id) {
     return node;
 }
 
-// ----------------------------------------------------------------------
-// Initialize Inverted Index
-// ----------------------------------------------------------------------
 InvertedIndex* create_inverted_index(void) {
     InvertedIndex *index = (InvertedIndex *)malloc(sizeof(InvertedIndex));
     if (!index) {
@@ -46,32 +37,26 @@ InvertedIndex* create_inverted_index(void) {
     return index;
 }
 
-// ----------------------------------------------------------------------
-// Insert Token into Inverted Index
-// ----------------------------------------------------------------------
 void insert_token(InvertedIndex *index, const char *token, int doc_id) {
     if (!index || !token || strlen(token) == 0) return;
 
     unsigned long bucket_idx = hash_djb2(token);
     HashEntry *entry = index->buckets[bucket_idx];
 
-    // Check if token already exists in bucket chain
     while (entry != NULL) {
         if (strcmp(entry->word, token) == 0) {
-            // Token found, now check postings list
+            
             PostingNode *p = entry->head;
             PostingNode *prev = NULL;
 
             while (p != NULL) {
                 if (p->doc_id == doc_id) {
-                    p->term_frequency++; // Term repeats in same document
+                    p->term_frequency++; 
                     return;
                 }
                 prev = p;
                 p = p->next;
             }
-
-            // New document for existing token (append to postings chain)
             PostingNode *new_p = create_posting_node(doc_id);
             if (prev) {
                 prev->next = new_p;
@@ -83,7 +68,7 @@ void insert_token(InvertedIndex *index, const char *token, int doc_id) {
         entry = entry->next;
     }
 
-    // New token in index: allocate HashEntry
+    
     HashEntry *new_entry = (HashEntry *)malloc(sizeof(HashEntry));
     if (!new_entry) {
         perror("Failed to allocate HashEntry");
@@ -94,14 +79,11 @@ void insert_token(InvertedIndex *index, const char *token, int doc_id) {
     strcpy(new_entry->word, token);
     new_entry->head = create_posting_node(doc_id);
 
-    // Insert at head of hash table bucket (Separate Chaining)
     new_entry->next = index->buckets[bucket_idx];
     index->buckets[bucket_idx] = new_entry;
 }
 
-// ----------------------------------------------------------------------
-// Search Vocabulary and Return Postings List Pointer
-// ----------------------------------------------------------------------
+
 PostingNode* get_postings(InvertedIndex *index, const char *token) {
     if (!index || !token) return NULL;
 
@@ -115,12 +97,10 @@ PostingNode* get_postings(InvertedIndex *index, const char *token) {
         entry = entry->next;
     }
 
-    return NULL; // Term not present in vocabulary
+    return NULL; 
 }
 
-// ----------------------------------------------------------------------
-// Dynamic Memory Cleanup (Zero-leak free function)
-// ----------------------------------------------------------------------
+
 void free_inverted_index(InvertedIndex *index) {
     if (!index) return;
 
@@ -130,7 +110,6 @@ void free_inverted_index(InvertedIndex *index) {
             HashEntry *temp_entry = entry;
             entry = entry->next;
 
-            // Free the postings linked list
             PostingNode *p = temp_entry->head;
             while (p != NULL) {
                 PostingNode *temp_p = p;
@@ -138,7 +117,7 @@ void free_inverted_index(InvertedIndex *index) {
                 free(temp_p);
             }
 
-            // Free allocated string and hash entry
+
             free(temp_entry->word);
             free(temp_entry);
         }
@@ -147,9 +126,6 @@ void free_inverted_index(InvertedIndex *index) {
     free(index);
 }
 
-// ----------------------------------------------------------------------
-// Print Index Metrics
-// ----------------------------------------------------------------------
 void print_index_stats(const InvertedIndex *index) {
     if (!index) return;
     int unique_words = 0;
